@@ -5,10 +5,9 @@
 		flexRender,
 		getCoreRowModel,
 		getSortedRowModel,
-		typeColumnDef,
 		type RowData
 	} from '@tanstack/svelte-table';
-	import { onMount, SvelteComponent } from 'svelte';
+	import { onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import type { PluginData } from './type';
 
@@ -26,12 +25,6 @@
 			is_number?: boolean;
 		}
 	}
-
-	class TableCell extends SvelteComponent<{
-		value: unknown;
-		row: RowData;
-		column: ColumnMeta;
-	}> {}
 
 	let locked = true;
 	let offset = 0;
