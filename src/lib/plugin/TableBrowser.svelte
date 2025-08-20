@@ -480,7 +480,7 @@
 	{:else}
 		<p class="mt-4">
 			{$t('plugin.table-browser.no-results')}
-		p>
+		</p>
 	{/if}
 
 	<div class="flex items-center justify-between">
