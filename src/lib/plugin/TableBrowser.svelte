@@ -194,17 +194,16 @@
 </script>
 
 <div class="pt-4 pb-2">
-	<label class="swap">
-		<input type="checkbox" bind:checked={locked} />
-		<div class="swap-on flex items-center gap-2">
-			<Icon icon="mdi:lock-outline" class="inline-block text-xl" />
-			{$t("plugin.table-browser.table-is-locked-click-to-unlock")}
-		</div>
-		<div class="swap-off flex items-center gap-2">
-			<Icon icon="mdi:lock-open-outline" class="inline-block text-xl" />
-			{$t("plugin.table-browser.table-is-unlocked-click-to-lock")}
-		</div>
-	</label>
+	<div class="form-control">
+		<label class="label cursor-pointer">
+			<span class="label-text"
+				>{locked
+					? $t("plugin.table-browser.table-is-locked")
+					: $t("plugin.table-browser.table-is-unlocked")}</span
+			>
+			<input type="checkbox" class="toggle" bind:checked={locked} />
+		</label>
+	</div>
 </div>
 
 {#if result}
@@ -212,7 +211,7 @@
 		<div class="max-h-[80vh] overflow-auto transition-opacity" class:opacity-50={running}>
 			<table class="table-sm table min-w-full">
 				<thead>
-					<tr class="sticky top-0 z-10 shadow glass">
+					<tr class="sticky top-0 z-10 bg-base-300 shadow">
 						{#each cols as col}
 							<th
 								class="!relative cursor-pointer normal-case"
@@ -238,7 +237,7 @@
 									<td>
 										{#if typeof row[key] === "number"}
 											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent placeholder:text-base-content/50"
+												class="input-ghost input input-xs w-full transition-all disabled:bg-transparent"
 												type="number"
 												bind:value={row[key]}
 												on:blur={() => edit(row._, key)}
@@ -249,7 +248,7 @@
 											/>
 										{:else}
 											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent placeholder:text-base-content/50"
+												class="input-ghost input input-xs w-full transition-all disabled:bg-transparent"
 												bind:value={row[key]}
 												on:change={() => edit(row._, key)}
 												disabled={locked || running}
@@ -266,7 +265,7 @@
 									class="pointer-events-none flex items-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
 								>
 									<button
-										class="btn-outline btn-error btn-xs btn glass"
+										class="btn-error btn-xs btn"
 										on:click={() => remove(row._)}
 										disabled={locked || running}
 									>
@@ -280,51 +279,37 @@
 			</table>
 		</div>
 	{:else}
-		<p class="mt-4">
+		<div class="alert">
 			{$t("plugin.table-browser.no-results")}
-		</p>
+		</div>
 	{/if}
 
-	<div class="flex items-center justify-between">
-		{#if offset > 0}
-			<button
-				class="btn-ghost btn-sm btn glass"
-				on:click={() => {
-					offset -= limit;
-					run();
-				}}
-				disabled={running}
-			>
-				{$t("plugin.table-browser.prev")}
-			</button>
-		{/if}
-
-		<p class="flex-grow-0 px-4">
-			{$t("plugin.table-browser.showing", {
-				values: {
-					from: result.length ? offset + 1 : offset,
-					to: offset + result.length,
-				},
-			})}
-		</p>
-
-		{#if result.length === limit}
-			<button
-				class="btn-ghost btn-sm btn glass"
-				on:click={() => {
-					offset += limit;
-					run();
-				}}
-				disabled={running}
-			>
-				{$t("plugin.table-browser.next")}
-			</button>
-		{/if}
+	<div class="join mt-4 grid grid-cols-2">
+		<button
+			class="btn-outline join-item btn"
+			on:click={() => {
+				offset -= limit;
+				run();
+			}}
+			disabled={running || offset <= 0}
+		>
+			{$t("plugin.table-browser.prev")}
+		</button>
+		<button
+			class="btn-outline join-item btn"
+			on:click={() => {
+				offset += limit;
+				run();
+			}}
+			disabled={running || result.length < limit}
+		>
+			{$t("plugin.table-browser.next")}
+		</button>
 	</div>
 {/if}
 
 {#if error}
-	<div class="alert alert-error shadow-lg glass">
+	<div class="alert alert-error shadow-lg">
 		<div>{error.error.cause || error.error.message}</div>
 	</div>
 {/if}

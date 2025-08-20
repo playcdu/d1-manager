@@ -155,7 +155,7 @@
 
 <table class="table">
 	<thead>
-		<tr class="glass">
+		<tr class="bg-base-300">
 			<th class="w-40">{$t("plugin.add-record.column")}</th>
 			<th>{$t("plugin.add-record.value")}</th>
 		</tr>
@@ -168,7 +168,7 @@
 					{#if input_type(col.type) !== "file"}
 						<div class="w-full">
 							<input
-								class="input-border input input-sm w-full transition-colors glass placeholder:text-base-content/50"
+								class="input-bordered input input-sm w-full transition-colors"
 								class:input-error={record[col.name].err}
 								type={input_type(col.type)}
 								on:input={(e) => {
@@ -191,7 +191,7 @@
 							{/if}
 						</div>
 					{:else}
-						<span class="text-error"> File upload not supported yet </span>
+						<div class="alert alert-warning">File upload not supported yet</div>
 					{/if}
 				</td>
 			</tr>
@@ -199,24 +199,18 @@
 	</tbody>
 </table>
 
-<button class="btn-primary btn glass" on:click={add} disabled={running}>
+<div class="divider"></div>
+
+<button class="btn-primary btn" on:click={add} disabled={running}>
 	{$t("plugin.add-record.add")}
 </button>
 
 {#if result}
-	<div class="alert alert-success glass">
-		<h3>{$t("plugin.add-record.success")}</h3>
-		<p class="mt-2 text-sm opacity-70">
-			{$t("plugin.add-record.n-ms", {
-				values: {
-					n: result.meta.duration.toFixed(2),
-				},
-			})}
-		</p>
+	<div class="alert alert-success">
+		{$t("plugin.add-record.success")}
 	</div>
 {:else if error}
-	<div class="alert alert-error glass">
-		<h3>{$t("plugin.add-record.error")}</h3>
-		<p>{error.error.cause || error.error.message}</p>
+	<div class="alert alert-error">
+		{error.error.cause || error.error.message}
 	</div>
 {/if}

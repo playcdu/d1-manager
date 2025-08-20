@@ -107,18 +107,18 @@
 	{$t("plugin.semantic-query.autorun-on-read-only-queries")}
 </p>
 
-<div class="w-full">
+<div class="form-control">
 	<div class="join w-full">
-		<textarea
-			class="textarea-border textarea join-item h-12 flex-1 resize-y font-sans glass placeholder:text-base-content/50"
+		<input
+			class="input-bordered input join-item w-full"
 			placeholder={$t("show-first-10-records")}
 			bind:value={query}
 			on:keypress={suggest_handler}
 			disabled={running}
-		></textarea>
+		/>
 
 		<button
-			class="btn-primary btn-outline btn join-item h-auto min-w-[6rem] glass"
+			class="btn-primary btn-outline join-item btn"
 			on:click={suggest}
 			disabled={running}
 		>
@@ -127,18 +127,18 @@
 	</div>
 </div>
 
-<div class="w-full">
+<div class="form-control">
 	<div class="join w-full">
-		<textarea
-			class="textarea-border textarea join-item h-16 flex-1 resize-y font-mono glass placeholder:text-base-content/50"
+		<input
+			class="input-bordered input join-item w-full font-mono"
 			placeholder={$t("suggestion-will-appear-here")}
 			bind:value={suggestion}
 			on:keypress={run_handler}
 			disabled={running}
-		></textarea>
+		/>
 
 		<button
-			class="btn-primary btn join-item h-auto min-w-[6rem] glass"
+			class="btn-primary join-item btn"
 			class:btn-error={danger}
 			on:click={run}
 			disabled={running}
@@ -149,13 +149,13 @@
 </div>
 
 {#if result}
-	<div class="divider before:bg-white/20 after:bg-white/20"></div>
+	<div class="divider" />
 
 	{#if result.results?.length}
 		<div class="max-h-[80vh] overflow-auto">
 			<table class="table-sm table w-full">
 				<thead>
-					<tr class="sticky top-0 z-10 shadow glass">
+					<tr class="sticky top-0 z-10 bg-base-300 shadow">
 						{#each Object.keys(result.results[0]) as key}
 							<th class="!relative normal-case">{key}</th>
 						{/each}
@@ -165,9 +165,7 @@
 					{#each result.results as row}
 						<tr class="hover">
 							{#each Object.values(row) as value}
-								<td class:text-opacity-50={value === null}
-									>{value}</td
-								>
+								<td class:opacity-50={value === null}>{value}</td>
 							{/each}
 						</tr>
 					{/each}
@@ -175,24 +173,27 @@
 			</table>
 		</div>
 	{:else}
-		<p>
-			{$t("plugin.semantic-query.no-results")}
-		</p>
+		<div class="alert">{$t("plugin.semantic-query.no-results")}</div>
 	{/if}
 
-	<div class="mt-2 flex w-full justify-between gap-2 space-x-2">
-		<p class="text-sm opacity-70">
-			{$t("plugin.semantic-query.n-ms-m-changes", {
-				values: {
-					n: result.meta.duration.toFixed(2),
-					rr: result.meta.rows_read ?? "x",
-					rw: result.meta.rows_written ?? result.meta.changes,
-				},
-			})}
-		</p>
+	<div class="mt-2 flex w-full items-center justify-between gap-2 space-x-2">
+		<div class="stats">
+			<div class="stat">
+				<div class="stat-title">Duration</div>
+				<div class="stat-value text-sm">{result.meta.duration.toFixed(2)}ms</div>
+			</div>
+			<div class="stat">
+				<div class="stat-title">Rows Read</div>
+				<div class="stat-value text-sm">{result.meta.rows_read ?? "N/A"}</div>
+			</div>
+			<div class="stat">
+				<div class="stat-title">Rows Written</div>
+				<div class="stat-value text-sm">{result.meta.rows_written ?? "N/A"}</div>
+			</div>
+		</div>
 		{#if result.results?.length}
 			<button
-				class="btn-primary btn-outline btn-sm btn glass"
+				class="btn-primary btn-outline btn-sm btn"
 				on:click={() => (result ? export_csv(result.results, table) : undefined)}
 			>
 				{$t("plugin.semantic-query.export")}
@@ -202,11 +203,11 @@
 {/if}
 
 {#if error}
-	<div class="divider before:bg-white/20 after:bg-white/20"></div>
+	<div class="divider" />
 
-	<div class="alert alert-error shadow-lg glass">
+	<div class="alert alert-error shadow-lg">
 		<div>{error}</div>
 	</div>
 {/if}
 
-<div id="bottom"></div>
+<div id="bottom" />

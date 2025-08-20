@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col">
+<div class="flex h-full w-full flex-col bg-base-100">
 	<div class="navbar glass min-h-12 rounded-none">
 		<div class="flex-1">
 			<a
@@ -56,7 +56,7 @@
 		</div>
 		<div class="flex-none">
 			<select
-				class="select-border select select-sm w-full max-w-xs glass"
+				class="select-ghost select select-sm w-full max-w-xs"
 				bind:value={database}
 				on:click={preload}
 			>
@@ -67,7 +67,7 @@
 			</select>
 		</div>
 	</div>
-	<div class="w-full flex-1 overflow-y-auto p-4">
+	<div class="w-full flex-1 overflow-y-auto">
 		<slot />
 	</div>
 </div>

@@ -42,41 +42,34 @@
 	/>
 </svelte:head>
 
-<div class="grid w-full grid-cols-12 gap-4">
+<div class="grid w-full grid-cols-12 gap-4 p-4">
 	<div class="col-span-3">
-		<div class="card w-full glass">
+		<div class="card-bordered card w-full bg-base-200">
 			<div class="card-body">
 				<h2 class="card-title">{meta.name}</h2>
+				<div class="divider"></div>
 				<div>
 					<div class="overflow-x-auto">
-						<table class="table-sm table w-full">
-							<thead>
-								<tr>
-									<th>{$t("col-name")}</th>
-									<th>{$t("col-type")}</th>
-									<th>{$t("col-default")}</th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each meta.columns as column}
-									<tr class="hover" class:font-bold={column.pk}>
-										<td>{column.name}</td>
-										<td>{column.type}</td>
-										<td>{column.dflt_value}</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
+						<ul class="menu">
+							{#each meta.columns as column}
+								<li class:font-bold={column.pk}>
+									<a>
+										{column.name}
+										<span class="badge-ghost badge">{column.type}</span>
+									</a>
+								</li>
+							{/each}
+						</ul>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="col-span-9">
-		<div class="card w-full glass">
+		<div class="card-bordered card w-full bg-base-200">
 			<div class="card-body">
 				<select
-					class="select-border select max-w-xs glass"
+					class="select-bordered select max-w-xs"
 					bind:value={plugin}
 					on:click={preload_plugins}
 				>
@@ -84,6 +77,7 @@
 						<option value={name}>{$t(`plugin.${name}.name`)}</option>
 					{/each}
 				</select>
+				<div class="divider"></div>
 
 				{#if PluginComponent}
 					<svelte:component

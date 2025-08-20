@@ -16,7 +16,5 @@ body {
 }
 
 .glass {
-	@apply backdrop-blur-lg rounded-lg shadow-lg;
-	background-color: hsl(var(--b2) / 0.4);
-	border: 1px solid hsl(var(--b3));
+	@apply hidden;
 }

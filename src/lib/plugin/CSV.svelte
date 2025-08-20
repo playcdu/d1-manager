@@ -177,19 +177,20 @@
 	}
 </script>
 
-<div class="w-full rounded-lg p-4 glass">
-	<p class="card-title">{$t("plugin.csv.import-csv")}</p>
+<div class="tabs-boxed tabs">
+	<a class="tab">{$t("plugin.csv.import-csv")}</a>
+	<a class="tab">{$t("plugin.csv.export-csv")}</a>
+</div>
 
-	<div class="divider"></div>
-
-	<div class="w-full">
+<div class="w-full rounded-lg border p-4">
+	<div class="form-control w-full">
 		<label class="label" for="csv">
 			<span class="label-text">{$t("plugin.csv.select-a-csv-file")}</span>
 		</label>
 		<input
 			id="csv"
 			type="file"
-			class="file-input-border file-input w-full glass"
+			class="file-input-bordered file-input w-full"
 			bind:files
 			accept=".csv"
 			on:change={read}
@@ -197,7 +198,6 @@
 		/>
 		<label class="label" for="csv">
 			<span class="label-text-alt text-error">{error || ""}</span>
-			<span class="label-text-alt">.csv</span>
 		</label>
 	</div>
 
@@ -205,7 +205,7 @@
 		<div class="my-2 max-h-[70vh] overflow-auto">
 			<table class="table-sm table w-full">
 				<thead>
-					<tr class="sticky top-0 z-10 shadow glass">
+					<tr class="sticky top-0 z-10 bg-base-300 shadow">
 						{#each keys as key}
 							<th class="!relative normal-case">{key}</th>
 						{/each}
@@ -223,7 +223,7 @@
 			</table>
 		</div>
 
-		<button class="btn-primary btn w-full glass" on:click={import_csv} disabled={running}>
+		<button class="btn-primary btn w-full" on:click={import_csv} disabled={running}>
 			{$t("plugin.csv.import")}
 		</button>
 	{/if}
@@ -237,14 +237,4 @@
 			})}
 		</p>
 	{/if}
-</div>
-
-<div class="w-full rounded-lg p-4 glass">
-	<p class="card-title">{$t("plugin.csv.export-csv")}</p>
-
-	<div class="divider"></div>
-
-	<button class="btn-primary btn w-full glass" on:click={export_csv} disabled={running}>
-		{$t("plugin.csv.export")}
-	</button>
 </div>

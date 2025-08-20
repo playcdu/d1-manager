@@ -53,27 +53,22 @@
 	<meta name="description" content={$t("d1-manager.description")} />
 </svelte:head>
 
-<div class="hero min-h-full">
-	<div class="hero-content text-center">
+<div
+	class="hero min-h-full"
+	style="background-image: url(https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);"
+>
+	<div class="hero-overlay bg-opacity-60"></div>
+	<div class="hero-content text-center text-neutral-content">
 		<div class="max-w-md">
-			<h1 class="text-5xl font-bold">{$t("d1-manager.name")}</h1>
-			<p class="py-6">
+			<h1 class="mb-5 text-5xl font-bold">{$t("d1-manager.name")}</h1>
+			<p class="mb-5">
 				{$t("d1-manager.description")}
 			</p>
-			<a
-				href="https://github.com/JacobLinCool/d1-manager"
-				target="_blank"
-				rel="noreferrer"
-				class="btn-primary btn"
-				>{$t("see-github")}</a
-			>
-
-			<div class="divider"></div>
 
 			<div class="flex justify-center gap-4">
 				<div class="w-full max-w-xs">
 					<label class="label" for="theme-select">
-						<span class="label-text">{$t("theme")}</span>
+						<span class="label-text text-neutral-content">{$t("theme")}</span>
 					</label>
 					<select data-choose-theme id="theme-select" class="select-accent select w-full">
 						{#each themes as theme}
@@ -84,7 +79,7 @@
 
 				<div class="w-full max-w-xs">
 					<label class="label" for="language-select">
-						<span class="label-text">{$t("language")}</span>
+						<span class="label-text text-neutral-content">{$t("language")}</span>
 					</label>
 					<select id="language-select" class="select-accent select w-full" bind:value={$lang}>
 						{#each $locales as lang}
