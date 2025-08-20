@@ -21,6 +21,8 @@
 	let dir: "ASC" | "DESC" = "ASC";
 	let select = "*";
 	let where = "";
+	let last_run_sql = "";
+	let is_custom_sql_result = false;
 
 	let query_mode: "semantic" | "sql" = "semantic";
 	let query = "";
@@ -45,6 +47,7 @@
 			return;
 		}
 		running = true;
+		is_custom_sql_result = false;
 
 		try {
 			const params = new URLSearchParams();
@@ -58,6 +61,9 @@
 			if (where) {
 				params.set("where", where);
 			}
+			last_run_sql = `SELECT ${select} FROM \`${table}\`${where ? ` WHERE ${where}` : ""}${
+				order ? ` ORDER BY ${order} ${dir}` : ""
+			} LIMIT ${limit} OFFSET ${offset}`;
 			const res = await fetch(`/api/db/${database}/${table}/data?${params.toString()}`);
 
 			const json = await res.json<typeof result | typeof error>();
@@ -92,27 +98,58 @@
 			return;
 		}
 		running = true;
+		error = undefined;
 
-		if (query_mode === "semantic") {
-			const res = await fetch(`/api/db/${database}/assistant`, {
-				method: "POST",
-				body: JSON.stringify({
-					table,
-					query,
-				}),
-			});
-			if (res.ok) {
-				const sql = await res.text();
-				where = sql;
-				run();
+		try {
+			if (query_mode === "semantic") {
+				const res = await fetch(`/api/db/${database}/assistant`, {
+					method: "POST",
+					body: JSON.stringify({
+						table,
+						query
+					})
+				});
+				if (res.ok) {
+					const sql = await res.text();
+					where = sql;
+					await run();
+				} else {
+					throw new Error(await res.text());
+				}
+			} else {
+				where = "";
+				const res = await fetch(`/api/db/${database}/all`, {
+					method: "POST",
+					body: JSON.stringify({ query })
+				});
+
+				const json = await res.json();
+				if (res.ok) {
+					if ("results" in json) {
+						result = json.results;
+					} else {
+						result = [];
+					}
+					last_run_sql = query;
+					is_custom_sql_result = true;
+				} else {
+					if ("message" in json) {
+						throw new Error(json.message);
+					}
+					throw new Error("SQL query failed");
+				}
 			}
-		} else {
-			where = query;
-			run();
+		} catch (err) {
+			if (err instanceof Error) {
+				error = { error: { message: err.message } };
+			}
+		} finally {
+			running = false;
 		}
 	}
 
 	function change_sort(col: string) {
+		if (is_custom_sql_result) return;
 		if (order === col) {
 			dir = dir === "ASC" ? "DESC" : "ASC";
 		} else {
@@ -239,15 +276,15 @@
 	</label>
 </div>
 
-<div class="form-control">
+<form class="form-control" on:submit|preventDefault={run_query}>
 	<div class="input-group">
 		<input
 			type="text"
 			placeholder="Enter a semantic query..."
 			class="input-bordered input w-full"
 			bind:value={query}
-			on:keydown={(e) => e.key === "Enter" && run_query()}
 		/>
+		<button type="submit" class="btn btn-primary">Query</button>
 		<div class="tabs-boxed tabs">
 			<a
 				class="tab"
@@ -259,7 +296,18 @@
 			>
 		</div>
 	</div>
-</div>
+</form>
+
+{#if last_run_sql}
+	<div class="my-4">
+		<p class="text-sm font-bold uppercase tracking-wider">Last Query</p>
+		<div
+			class="font-mono rounded-md border border-white border-opacity-20 bg-white bg-opacity-10 p-2 text-sm backdrop-blur-lg"
+		>
+			{last_run_sql}
+		</div>
+	</div>
+{/if}
 
 {#if result}
 	{#if result.length}
@@ -267,16 +315,19 @@
 			<table class="table-sm table min-w-full">
 				<thead>
 					<tr class="bg-base-200 sticky top-0 z-10 shadow">
-						{#each cols as col}
+						{#each Object.keys(result[0] || {}) as col}
 							<th
-								class="!relative cursor-pointer normal-case"
+								class="!relative normal-case"
+								class:cursor-pointer={!is_custom_sql_result}
 								on:click={() => change_sort(col)}
-								title={$t("plugin.table-browser.click-to-sort-by", {
-									values: { col },
-								})}
+								title={!is_custom_sql_result
+									? $t("plugin.table-browser.click-to-sort-by", {
+											values: { col }
+									  })
+									: undefined}
 							>
 								{col}
-								{#if order === col}
+								{#if order === col && !is_custom_sql_result}
 									<span class="text-sm font-normal opacity-50">{dir}</span>
 								{/if}
 							</th>
@@ -296,9 +347,11 @@
 												type="number"
 												bind:value={row[key]}
 												on:blur={() => edit(row._, key)}
-												disabled={locked || running}
+												disabled={locked || running || is_custom_sql_result}
 												title={locked
 													? $t("plugin.table-browser.table-is-locked")
+													: is_custom_sql_result
+													? 'Editing is disabled for custom queries'
 													: undefined}
 											/>
 										{:else}
@@ -306,9 +359,11 @@
 												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
 												bind:value={row[key]}
 												on:change={() => edit(row._, key)}
-												disabled={locked || running}
+												disabled={locked || running || is_custom_sql_result}
 												title={locked
 													? $t("plugin.table-browser.table-is-locked")
+													: is_custom_sql_result
+													? 'Editing is disabled for custom queries'
 													: undefined}
 											/>
 										{/if}
@@ -322,7 +377,7 @@
 									<button
 										class="btn-outline btn-error btn-xs btn"
 										on:click={() => remove(row._)}
-										disabled={locked || running}
+										disabled={locked || running || is_custom_sql_result}
 									>
 										<Icon class="text-lg" icon="mdi:delete-outline" />
 									</button>
@@ -340,7 +395,7 @@
 	{/if}
 
 	<div class="flex items-center justify-between">
-		{#if offset > 0}
+		{#if offset > 0 && !is_custom_sql_result}
 			<button
 				class="btn-ghost btn-sm btn"
 				on:click={() => {
@@ -362,7 +417,7 @@
 			})}
 		</p>
 
-		{#if result.length === limit}
+		{#if result.length === limit && !is_custom_sql_result}
 			<button
 				class="btn-ghost btn-sm btn"
 				on:click={() => {
