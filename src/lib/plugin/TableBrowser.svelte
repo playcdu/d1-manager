@@ -10,6 +10,8 @@
 	import { onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import type { PluginData } from './type';
+	import ActionsCell from './ActionsCell.svelte';
+	import TableCell from './TableCell.svelte';
 
 	export let database: string;
 	export let table: string;
@@ -321,19 +323,18 @@
 							is_number
 						},
 						cell: (info) => {
-							const initialValue = info.getValue();
-							let value = initialValue;
-							const row = info.row.original as Doc;
-
-							const onchange = (e) => {
-								value = e.target.value;
-								(result as Doc[])[info.row.index][key] = is_number ? Number(value) : value;
-								edit(row._);
-							};
-
-							return `<input class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent" type="${
-								is_number ? 'number' : 'text'
-							}" value="${value}" on:change="${onchange}" disabled="${locked || running}" />`;
+							return flexRender(TableCell, {
+								value: info.getValue(),
+								row: info.row,
+								column: info.column,
+								table: info.table,
+								edit,
+								locked,
+								running,
+								is_number,
+								key,
+								result
+							});
 						}
 					});
 			  })
@@ -351,11 +352,12 @@
 				tableInstance.createDisplayColumn({
 					id: 'actions',
 					cell: (info) => {
-						const row = info.row.original as Doc;
-						return `<button class="btn-outline btn-error btn-xs btn" on:click="${() =>
-							remove(row._)}" disabled="${locked || running}">
-							<Icon class="text-lg" icon="mdi:delete-outline' />
-						</button>`;
+						return flexRender(ActionsCell, {
+							row: info.row,
+							remove,
+							locked,
+							running
+						});
 					}
 				})
 			];
@@ -462,7 +464,7 @@
 						<tr class="group hover">
 							{#each row.getVisibleCells() as cell}
 								<td class="border">
-									{@html flexRender(cell.column.columnDef.cell, cell.getContext())}
+									<svelte:component this={cell.column.columnDef.cell} context={cell.getContext()} />
 								</td>
 							{/each}
 						</tr>
