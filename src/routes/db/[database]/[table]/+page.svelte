@@ -64,7 +64,6 @@
 		{#if PluginComponent}
 			<svelte:component
 				this={PluginComponent}
-				{data}
 				database={$page.params.database}
 				table={$page.params.table}
 			/>

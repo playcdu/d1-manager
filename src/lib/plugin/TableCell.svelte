@@ -3,8 +3,6 @@
 
 	export let value: unknown;
 	export let row: any;
-	export let column: any;
-	export let table: any;
 
 	export let edit: (rowid: unknown) => void;
 	export let locked: boolean;

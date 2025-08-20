@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import {
-		createSvelteTable,
+		SvelteTable,
 		flexRender,
 		getCoreRowModel,
 		getSortedRowModel,
@@ -342,7 +342,7 @@
 
 	$: tableData = result || [];
 
-	const tableInstance = createSvelteTable({
+	const tableInstance = new SvelteTable({
 		get data() {
 			return tableData;
 		},
@@ -394,13 +394,13 @@
 </div>
 
 <div class="tabs-boxed tabs mb-2 w-max bg-white/60 backdrop-blur-lg">
-	<a
+	<button
 		class="tab"
 		class:tab-active={query_mode === 'semantic'}
-		on:click={() => (query_mode = 'semantic')}>Semantic</a
+		on:click={() => (query_mode = 'semantic')}>Semantic</button
 	>
-	<a class="tab" class:tab-active={query_mode === 'sql'} on:click={() => (query_mode = 'sql')}
-		>SQL</a
+	<button class="tab" class:tab-active={query_mode === 'sql'} on:click={() => (query_mode = 'sql')}
+		>SQL</button
 	>
 </div>
 <form class="form-control" on:submit|preventDefault={run_query}>
