@@ -118,13 +118,13 @@
 		error = undefined;
 
 		try {
-			if (query_mode === 'semantic') {
+			if (query_mode === "semantic") {
 				const res = await fetch(`/api/db/${database}/assistant`, {
-					method: 'POST',
+					method: "POST",
 					body: JSON.stringify({
 						t: table,
-						q: query
-					})
+						q: query,
+					}),
 				});
 
 				if (!res.ok) {
@@ -136,12 +136,12 @@
 
 				// now execute the query
 				const query_res = await fetch(`/api/db/${database}/all`, {
-					method: 'POST',
-					body: JSON.stringify({ query: sql_to_run })
+					method: "POST",
+					body: JSON.stringify({ query: sql_to_run }),
 				});
 				const query_json = await query_res.json();
 				if (query_res.ok) {
-					if ('results' in query_json) {
+					if ("results" in query_json) {
 						result = query_json.results;
 					} else {
 						result = [];
@@ -149,21 +149,21 @@
 					last_run_sql = sql_to_run;
 					is_custom_sql_result = true;
 				} else {
-					if ('message' in query_json) {
+					if ("message" in query_json) {
 						throw new Error(query_json.message);
 					}
-					throw new Error('SQL query failed');
+					throw new Error("SQL query failed");
 				}
 			} else {
 				// For raw SQL, execute the query directly
 				const res = await fetch(`/api/db/${database}/all`, {
-					method: 'POST',
-					body: JSON.stringify({ query })
+					method: "POST",
+					body: JSON.stringify({ query }),
 				});
 
 				const json = await res.json();
 				if (res.ok) {
-					if ('results' in json) {
+					if ("results" in json) {
 						result = json.results;
 					} else {
 						result = [];
@@ -171,10 +171,10 @@
 					last_run_sql = query;
 					is_custom_sql_result = true;
 				} else {
-					if ('message' in json) {
+					if ("message" in json) {
 						throw new Error(json.message);
 					}
-					throw new Error('SQL query failed');
+					throw new Error("SQL query failed");
 				}
 			}
 		} catch (err) {
@@ -317,10 +317,10 @@
 <div class="tabs-boxed tabs mb-2 w-max">
 	<a
 		class="tab"
-		class:tab-active={query_mode === 'semantic'}
-		on:click={() => (query_mode = 'semantic')}>Semantic</a
+		class:tab-active={query_mode === "semantic"}
+		on:click={() => (query_mode = "semantic")}>Semantic</a
 	>
-	<a class="tab" class:tab-active={query_mode === 'sql'} on:click={() => (query_mode = 'sql')}
+	<a class="tab" class:tab-active={query_mode === "sql"} on:click={() => (query_mode = "sql")}
 		>SQL</a
 	>
 </div>
@@ -328,7 +328,9 @@
 	<div class="input-group">
 		<input
 			type="text"
-			placeholder={query_mode === 'semantic' ? 'Enter a semantic query...' : 'Enter an SQL query...'}
+			placeholder={query_mode === "semantic"
+				? "Enter a semantic query..."
+				: "Enter an SQL query..."}
 			class="input-bordered input w-full"
 			bind:value={query}
 		/>
@@ -338,9 +340,9 @@
 
 {#if last_run_sql}
 	<div class="my-4">
-		<p class="text-sm font-bold uppercase tracking-wider">Last Query</p>
+		<p class="text-sm font-bold tracking-wider uppercase">Last Query</p>
 		<div
-			class="font-mono rounded-md border border-white border-opacity-20 bg-white bg-opacity-10 p-2 text-sm backdrop-blur-lg"
+			class="border-opacity-20 bg-opacity-10 rounded-md border border-white bg-white p-2 font-mono text-sm backdrop-blur-lg"
 		>
 			{last_run_sql}
 		</div>
@@ -349,19 +351,22 @@
 
 {#if result}
 	{#if result.length}
-		<div class="max-h-[80vh] overflow-auto transition-opacity" class:opacity-50={running}>
-			<table class="table-sm table min-w-full">
+		<div
+			class="max-h-[80vh] w-full overflow-auto transition-opacity"
+			class:opacity-50={running}
+		>
+			<table class="table-zebra table-pin-rows table w-full">
 				<thead>
 					<tr class="bg-base-200 sticky top-0 z-10 shadow">
 						{#each Object.keys(result[0] || {}) as col}
 							<th
-								class="!relative normal-case"
+								class="border-base-content border-opacity-20 !relative border-b normal-case"
 								class:cursor-pointer={!is_custom_sql_result}
 								on:click={() => change_sort(col)}
 								title={!is_custom_sql_result
 									? $t("plugin.table-browser.click-to-sort-by", {
-											values: { col }
-									  })
+											values: { col },
+										})
 									: undefined}
 							>
 								{col}
@@ -370,7 +375,7 @@
 								{/if}
 							</th>
 						{/each}
-						<th></th>
+						<th class="border-base-content border-opacity-20 border-b"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -378,7 +383,7 @@
 						<tr class="group hover">
 							{#each Object.keys(row) as key}
 								{#if key !== "_"}
-									<td>
+									<td class="border-base-content border-opacity-10 border-b">
 										{#if typeof row[key] === "number"}
 											<input
 												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
@@ -386,7 +391,9 @@
 												bind:value={row[key]}
 												on:blur={() => edit(row._, key)}
 												disabled={locked || running}
-												title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
+												title={locked
+													? $t("plugin.table-browser.table-is-locked")
+													: undefined}
 											/>
 										{:else}
 											<input
@@ -394,13 +401,15 @@
 												bind:value={row[key]}
 												on:change={() => edit(row._, key)}
 												disabled={locked || running}
-												title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
+												title={locked
+													? $t("plugin.table-browser.table-is-locked")
+													: undefined}
 											/>
 										{/if}
 									</td>
 								{/if}
 							{/each}
-							<td>
+							<td class="border-base-content border-opacity-10 border-b">
 								<div
 									class="pointer-events-none flex items-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
 								>
