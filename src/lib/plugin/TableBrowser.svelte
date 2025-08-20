@@ -42,13 +42,8 @@
 		run();
 	});
 
-	async function run() {
-		if (running) {
-			return;
-		}
-		running = true;
+	async function _fetchTableData() {
 		is_custom_sql_result = false;
-
 		try {
 			const params = new URLSearchParams();
 			params.set("select", `rowid AS _, ${select}`);
@@ -88,6 +83,16 @@
 				},
 			};
 			result = undefined;
+		}
+	}
+
+	async function run() {
+		if (running) {
+			return;
+		}
+		running = true;
+		try {
+			await _fetchTableData();
 		} finally {
 			running = false;
 		}
@@ -110,9 +115,8 @@
 					})
 				});
 				if (res.ok) {
-					const sql = await res.text();
-					where = sql;
-					await run();
+					where = await res.text();
+					await _fetchTableData();
 				} else {
 					throw new Error(await res.text());
 				}
