@@ -105,26 +105,26 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4">
-	<div class="flex gap-4">
-		<div class="rounded-lg bg-white p-4 shadow">
+	<div class="grid grid-cols-2 gap-4">
+		<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
 			<div class="text-sm font-medium text-gray-500">{$t('tables')}</div>
-			<div class="text-2xl font-bold">{data.db.length}</div>
+			<div class="text-5xl font-bold">{data.db.length}</div>
 		</div>
-		<div class="rounded-lg bg-white p-4 shadow">
+		<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
 			<div class="text-sm font-medium text-gray-500">{$t('total-rows')}</div>
-			<div class="text-2xl font-bold">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
+			<div class="text-5xl font-bold">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
 		</div>
 	</div>
 
 	<div class="flex gap-2">
 		<button
-			class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+			class="rounded-md bg-blue-500 px-4 py-2 text-white shadow-md transition-all hover:bg-blue-600 hover:shadow-lg"
 			on:click={import_db}
 		>
 			{$t('import')}
 		</button>
 		<a
-			class="rounded-md bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
+			class="rounded-md bg-white/60 px-4 py-2 text-gray-800 shadow-md backdrop-blur-lg transition-all hover:bg-white/80 hover:shadow-lg"
 			href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
 			target="_blank"
 			rel="noreferrer"
@@ -133,10 +133,10 @@
 		</a>
 	</div>
 
-	<div class="rounded-lg bg-white p-4 shadow">
+	<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
 		<div class="flex">
 			<textarea
-				class="w-full flex-1 rounded-l-md border border-gray-300 p-2 font-mono focus:border-blue-500 focus:ring-blue-500"
+				class="w-full flex-1 rounded-l-md border border-gray-300 bg-white/60 p-2 font-mono text-lg backdrop-blur-lg focus:border-blue-500 focus:ring-blue-500"
 				class:border-red-500={danger}
 				placeholder="Execute SQL query in {$page.params.database}"
 				bind:value={query}
@@ -145,7 +145,7 @@
 			></textarea>
 			{#if query}
 				<button
-					class="rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+					class="rounded-r-md bg-blue-500 px-4 py-2 text-white shadow-md transition-all hover:bg-blue-600 hover:shadow-lg"
 					class:bg-red-500={danger}
 					on:click={run}
 					disabled={running}

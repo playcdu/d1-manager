@@ -52,9 +52,9 @@
 	<title>Craft Down Under D1 Manager</title>
 </svelte:head>
 
-<div class="flex h-screen bg-gray-100 text-gray-800">
+<div class="grid h-dvh w-full grid-cols-[320px_1fr] bg-gray-100 text-gray-800">
 	<!-- Sidebar -->
-	<div class="w-80 flex-shrink-0 bg-gray-800 text-white">
+	<div class="flex-shrink-0 bg-gray-800 text-white">
 		<div class="flex h-full flex-col">
 			<div class="flex h-16 flex-shrink-0 items-center justify-center bg-gray-900 px-4">
 				<a class="flex items-center text-xl font-semibold" href="/">
@@ -98,8 +98,8 @@
 	</div>
 
 	<!-- Main content -->
-	<div class="flex flex-1 flex-col overflow-hidden">
-		<div class="flex-1 overflow-y-auto p-4">
+	<div class="flex flex-col overflow-hidden">
+		<div class="flex-1 overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-blue-50 p-8">
 			<slot />
 		</div>
 	</div>

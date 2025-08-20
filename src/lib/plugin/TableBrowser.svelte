@@ -311,13 +311,15 @@
 <div class="pt-4 pb-2">
 	<div class="form-control w-52">
 		<label class="label cursor-pointer">
-			<span class="label-text">{$t(locked ? 'plugin.table-browser.table-is-locked' : 'plugin.table-browser.table-is-unlocked')}</span>
+			<span class="label-text">
+				{$t(locked ? 'plugin.table-browser.table-is-locked' : 'plugin.table-browser.table-is-unlocked')}
+			</span>
 			<input type="checkbox" class="toggle toggle-primary" bind:checked={locked} />
 		</label>
 	</div>
 </div>
 
-<div class="tabs-boxed tabs mb-2 w-max">
+<div class="tabs-boxed tabs mb-2 w-max bg-white/60 backdrop-blur-lg">
 	<a
 		class="tab"
 		class:tab-active={query_mode === 'semantic'}
@@ -332,10 +334,14 @@
 		<input
 			type="text"
 			placeholder={query_mode === 'semantic' ? 'Enter a semantic query...' : 'Enter an SQL query...'}
-			class="input-bordered input w-full"
+			class="input-bordered input w-full bg-white/60 backdrop-blur-lg"
 			bind:value={query}
 		/>
-		<button type="submit" class="btn btn-primary">Query</button>
+		<button
+			type="submit"
+			class="btn btn-primary shadow-md transition-all hover:shadow-lg"
+			on:click={run_query}>Query</button
+		>
 	</div>
 </form>
 
@@ -343,7 +349,7 @@
 	<div class="my-4">
 		<p class="text-sm font-bold uppercase tracking-wider">Last Query</p>
 		<div
-			class="font-mono rounded-md border border-white border-opacity-20 bg-white bg-opacity-10 p-2 text-sm backdrop-blur-lg"
+			class="font-mono rounded-md border border-white/20 bg-white/60 p-2 text-sm backdrop-blur-lg"
 		>
 			{last_run_sql}
 		</div>

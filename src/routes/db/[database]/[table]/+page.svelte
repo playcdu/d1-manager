@@ -40,7 +40,7 @@
 	/>
 </svelte:head>
 
-<div class="rounded-lg bg-white p-4 shadow">
+<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
 	<div class="border-b border-gray-200">
 		<nav class="-mb-px flex gap-6">
 			{#each Object.keys(plugins) as name}
