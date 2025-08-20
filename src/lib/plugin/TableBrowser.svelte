@@ -316,7 +316,7 @@
 
 					const is_number = typeof result?.[0]?.[key] === "number";
 
-					return table.createDataColumn(key, {
+					return tableInstance.createDataColumn(key, {
 						header: () => key,
 						meta: {
 							is_number,
@@ -339,14 +339,14 @@
 
 	$: tableData = result || [];
 
-	const table = createTable({
+	const tableInstance = createTable({
 		get data() {
 			return tableData;
 		},
 		get columns() {
 			return [
 				...(columns || []).filter((c) => c),
-				table.createDisplayColumn({
+				tableInstance.createDisplayColumn({
 					id: "actions",
 					cell: (info) => {
 						return createRender(ActionsCell, {
@@ -363,7 +363,7 @@
 		getSortedRowModel: getSortedRowModel(),
 		onSortingChange: (updater) => {
 			const new_sorting_state =
-				typeof updater === "function" ? updater(table.getState().sorting) : updater;
+				typeof updater === "function" ? updater(tableInstance.getState().sorting) : updater;
 
 			if (new_sorting_state.length === 0) {
 				order = "";
@@ -443,7 +443,7 @@
 		>
 			<table class="table min-w-full">
 				<thead class="bg-white/60 backdrop-blur-lg">
-					{#each table.getHeaderGroups() as headerGroup}
+					{#each tableInstance.getHeaderGroups() as headerGroup}
 						<tr>
 							{#each headerGroup.headers as header}
 								<th class="!relative normal-case">
@@ -467,7 +467,7 @@
 					{/each}
 				</thead>
 				<tbody>
-					{#each table.getRowModel().rows as row}
+					{#each tableInstance.getRowModel().rows as row}
 						<tr class="group hover">
 							{#each row.getVisibleCells() as cell}
 								<td class="border">
