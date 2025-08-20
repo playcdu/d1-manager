@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@plugin "@tailwindcss/typography";
-@plugin "daisyui";
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@plugin 'daisyui';
 
 * {
 	@apply relative font-sans;
@@ -12,9 +12,10 @@
 
 html,
 body {
-	@apply absolute m-0 h-full w-full overflow-hidden p-0 transition-colors;
+	@apply absolute m-0 h-full w-full overflow-hidden p-0;
 }
 
-body {
-	background: linear-gradient(to right, #89f7fe, #66a6ff);
+html {
+	background-color: #1a1a1a;
+	color: #ffffff;
 }

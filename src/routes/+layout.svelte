@@ -6,7 +6,6 @@
 	import { onMount } from "svelte";
 	import { locale, t } from "svelte-i18n";
 	import { writable } from "svelte/store";
-	import { themeChange } from "theme-change";
 	import "../app.css";
 	import type { LayoutData } from "./$types";
 	import { preloadData } from "$app/navigation";
@@ -31,7 +30,6 @@
 	let lang = writable<string | null | undefined>(undefined);
 
 	onMount(() => {
-		themeChange(false);
 		lang = get("lang", {
 			default_value: window.navigator.language,
 			ttl: 30 * 24 * 60 * 60 * 1000,
@@ -89,22 +87,24 @@
 				</label>
 			</div>
 		</div>
-		<div class="p-4">
-			<h2 class="mb-2 text-sm font-bold uppercase tracking-wider">Databases</h2>
-			<div class="btn-group">
-				{#each data.dbms as db}
-					<a href="/db/{db}" class="btn" class:btn-active={$page.params.database === db}>{db}</a>
-				{/each}
+		<div
+			class="w-full flex-1 overflow-y-auto bg-grid-slate-700/[0.6] bg-center px-4 pb-4 [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"
+		>
+			<div class="p-4">
+				<h2 class="mb-2 text-sm font-bold uppercase tracking-wider">Databases</h2>
+				<div class="btn-group">
+					{#each data.dbms as db}
+						<a href="/db/{db}" class="btn" class:btn-active={$page.params.database === db}>{db}</a>
+					{/each}
+				</div>
 			</div>
-		</div>
-		<div class="w-full flex-1 overflow-y-auto px-4 pb-4">
 			<slot />
 		</div>
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer-2" class="drawer-overlay"></label>
 		<ul
-			class="menu min-h-full w-80 border-r border-white border-opacity-20 bg-white bg-opacity-10 p-4 text-base-content backdrop-blur-lg"
+			class="menu min-h-full w-80 border-r border-slate-700 bg-slate-800/[.9] p-4 text-base-content backdrop-blur-lg"
 		>
 			<!-- Sidebar content here -->
 			<li class="menu-title">{$t('tables')}</li>
@@ -120,14 +120,6 @@
 					</li>
 				{/each}
 			{/if}
-			<div class="grow"></div>
-			<li>
-				<label class="swap swap-rotate">
-					<input type="checkbox" data-toggle-theme="dark,light" />
-					<div class="swap-on">THEME</div>
-					<div class="swap-off">THEME</div>
-				</label>
-			</li>
 		</ul>
 	</div>
 </div>

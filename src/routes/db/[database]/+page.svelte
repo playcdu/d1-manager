@@ -105,14 +105,16 @@
 </svelte:head>
 
 <div class="flex w-full flex-col items-center justify-start gap-4">
-	<div class="stats shadow border border-white border-opacity-20 bg-white bg-opacity-10 backdrop-blur-lg">
+	<div
+		class="stats shadow border border-slate-700 bg-slate-800/[.9] backdrop-blur-lg"
+	>
 		<div class="stat">
-			<div class="stat-title">{$t("tables")}</div>
+			<div class="stat-title">{$t('tables')}</div>
 			<div class="stat-value">{data.db.length}</div>
 		</div>
 
 		<div class="stat">
-			<div class="stat-title">{$t("total-rows")}</div>
+			<div class="stat-title">{$t('total-rows')}</div>
 			<div class="stat-value">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
 		</div>
 	</div>
@@ -131,7 +133,9 @@
 		</a>
 	</div>
 
-	<div class="card w-full border border-white border-opacity-20 bg-white bg-opacity-10 shadow-lg backdrop-blur-lg">
+	<div
+		class="card w-full border border-slate-700 bg-slate-800/[.9] shadow-lg backdrop-blur-lg"
+	>
 		<div class="card-body">
 			<div class="join">
 				<textarea
