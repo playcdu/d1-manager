@@ -42,59 +42,58 @@
 	/>
 </svelte:head>
 
-<div class="flex w-full flex-col items-center justify-start gap-4">
-	<div class="card w-full glass">
-		<div class="card-body">
-			<div class="mb-4 flex justify-between">
+<div class="grid w-full grid-cols-12 gap-4">
+	<div class="col-span-3">
+		<div class="card w-full glass">
+			<div class="card-body">
 				<h2 class="card-title">{meta.name}</h2>
-				<div class="flex gap-2">
-					<!-- <button class="btn-outline btn-error btn-sm btn">Drop</button> -->
-				</div>
-			</div>
-
-			<div>
-				<div class="overflow-x-auto">
-					<table class="table-sm table w-full">
-						<thead>
-							<tr>
-								<th>{$t("col-name")}</th>
-								<th>{$t("col-type")}</th>
-								<th>{$t("col-default")}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each meta.columns as column}
-								<tr class="hover" class:font-bold={column.pk}>
-									<td>{column.name}</td>
-									<td>{column.type}</td>
-									<td>{column.dflt_value}</td>
+				<div>
+					<div class="overflow-x-auto">
+						<table class="table-sm table w-full">
+							<thead>
+								<tr>
+									<th>{$t("col-name")}</th>
+									<th>{$t("col-type")}</th>
+									<th>{$t("col-default")}</th>
 								</tr>
-							{/each}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{#each meta.columns as column}
+									<tr class="hover" class:font-bold={column.pk}>
+										<td>{column.name}</td>
+										<td>{column.type}</td>
+										<td>{column.dflt_value}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+	<div class="col-span-9">
+		<div class="card w-full glass">
+			<div class="card-body">
+				<select
+					class="select-border select max-w-xs glass"
+					bind:value={plugin}
+					on:click={preload_plugins}
+				>
+					{#each Object.keys(plugins) as name}
+						<option value={name}>{$t(`plugin.${name}.name`)}</option>
+					{/each}
+				</select>
 
-			<div class="divider"></div>
-
-			<select
-				class="select-border select max-w-xs glass text-white"
-				bind:value={plugin}
-				on:click={preload_plugins}
-			>
-				{#each Object.keys(plugins) as name}
-					<option class="text-black" value={name}>{$t(`plugin.${name}.name`)}</option>
-				{/each}
-			</select>
-
-			{#if PluginComponent}
-				<svelte:component
-					this={PluginComponent}
-					{data}
-					database={$page.params.database}
-					table={$page.params.table}
-				/>
-			{/if}
+				{#if PluginComponent}
+					<svelte:component
+						this={PluginComponent}
+						{data}
+						database={$page.params.database}
+						table={$page.params.table}
+					/>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>

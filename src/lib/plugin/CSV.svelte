@@ -180,7 +180,7 @@
 <div class="w-full rounded-lg p-4 glass">
 	<p class="card-title">{$t("plugin.csv.import-csv")}</p>
 
-	<div class="divider before:bg-white/20 after:bg-white/20"></div>
+	<div class="divider"></div>
 
 	<div class="w-full">
 		<label class="label" for="csv">
@@ -215,7 +215,7 @@
 					{#each casted as row}
 						<tr class="hover">
 							{#each row as value}
-								<td class="text-white">{value}</td>
+								<td>{value}</td>
 							{/each}
 						</tr>
 					{/each}
@@ -242,7 +242,7 @@
 <div class="w-full rounded-lg p-4 glass">
 	<p class="card-title">{$t("plugin.csv.export-csv")}</p>
 
-	<div class="divider before:bg-white/20 after:bg-white/20"></div>
+	<div class="divider"></div>
 
 	<button class="btn-primary btn w-full glass" on:click={export_csv} disabled={running}>
 		{$t("plugin.csv.export")}

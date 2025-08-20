@@ -110,7 +110,7 @@
 <div class="w-full">
 	<div class="join w-full">
 		<textarea
-			class="textarea-border textarea join-item h-12 flex-1 resize-y font-sans glass text-white placeholder:text-gray-300"
+			class="textarea-border textarea join-item h-12 flex-1 resize-y font-sans glass placeholder:text-base-content/50"
 			placeholder={$t("show-first-10-records")}
 			bind:value={query}
 			on:keypress={suggest_handler}
@@ -130,7 +130,7 @@
 <div class="w-full">
 	<div class="join w-full">
 		<textarea
-			class="textarea-border textarea join-item h-16 flex-1 resize-y font-mono glass text-white placeholder:text-gray-300"
+			class="textarea-border textarea join-item h-16 flex-1 resize-y font-mono glass placeholder:text-base-content/50"
 			placeholder={$t("suggestion-will-appear-here")}
 			bind:value={suggestion}
 			on:keypress={run_handler}
@@ -165,7 +165,7 @@
 					{#each result.results as row}
 						<tr class="hover">
 							{#each Object.values(row) as value}
-								<td class="text-white" class:text-opacity-50={value === null}
+								<td class:text-opacity-50={value === null}
 									>{value}</td
 								>
 							{/each}

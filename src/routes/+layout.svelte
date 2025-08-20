@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col text-white">
+<div class="flex h-full w-full flex-col">
 	<div class="navbar glass min-h-12 rounded-none">
 		<div class="flex-1">
 			<a
@@ -60,9 +60,9 @@
 				bind:value={database}
 				on:click={preload}
 			>
-				<option class="text-black" value="" disabled selected>{$t("select-database")}</option>
+				<option value="" disabled selected>{$t("select-database")}</option>
 				{#each data.dbms as db}
-					<option class="text-black" value={db}>{db}</option>
+					<option value={db}>{db}</option>
 				{/each}
 			</select>
 		</div>

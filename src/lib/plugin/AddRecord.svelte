@@ -168,7 +168,7 @@
 					{#if input_type(col.type) !== "file"}
 						<div class="w-full">
 							<input
-								class="input-border input input-sm w-full transition-colors glass text-white placeholder:text-gray-300"
+								class="input-border input input-sm w-full transition-colors glass placeholder:text-base-content/50"
 								class:input-error={record[col.name].err}
 								type={input_type(col.type)}
 								on:input={(e) => {

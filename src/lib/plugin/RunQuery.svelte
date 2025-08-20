@@ -59,7 +59,7 @@
 
 <div class="w-full">
 	<textarea
-		class="textarea-border textarea h-24 w-full resize-y font-mono glass text-white placeholder:text-gray-300"
+		class="textarea-border textarea h-24 w-full resize-y font-mono glass placeholder:text-base-content/50"
 		placeholder="SELECT COUNT(*) AS c FROM {table}"
 		bind:value={query}
 		on:keypress={handler}
@@ -87,7 +87,7 @@
 					{#each result.results as row}
 						<tr class="hover">
 							{#each Object.values(row) as value}
-								<td class="text-white" class:text-opacity-50={value === null}
+								<td class:text-opacity-50={value === null}
 									>{value}</td
 								>
 							{/each}

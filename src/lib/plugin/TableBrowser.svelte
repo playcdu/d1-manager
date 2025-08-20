@@ -238,7 +238,7 @@
 									<td>
 										{#if typeof row[key] === "number"}
 											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent text-white placeholder:text-gray-300"
+												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent placeholder:text-base-content/50"
 												type="number"
 												bind:value={row[key]}
 												on:blur={() => edit(row._, key)}
@@ -249,7 +249,7 @@
 											/>
 										{:else}
 											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent text-white placeholder:text-gray-300"
+												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent placeholder:text-base-content/50"
 												bind:value={row[key]}
 												on:change={() => edit(row._, key)}
 												disabled={locked || running}

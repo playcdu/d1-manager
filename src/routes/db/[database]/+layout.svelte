@@ -98,7 +98,7 @@
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer" class="drawer-overlay"></label>
-		<ul class="menu w-80 overflow-y-auto bg-transparent p-4 text-white">
+		<ul class="menu w-80 overflow-y-auto bg-transparent p-4 text-base-content">
 			{#each data.db as table}
 				<li>
 					<a

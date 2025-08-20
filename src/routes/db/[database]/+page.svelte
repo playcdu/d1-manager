@@ -74,7 +74,7 @@
 		<div class="card-body">
 			<div class="join">
 				<textarea
-					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors glass text-white placeholder:text-gray-300"
+					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors glass placeholder:text-base-content/50"
 					class:!outline-error={danger}
 					placeholder={$t("execute-sql-query-in-database", {
 						values: { db: $page.params.database },
