@@ -61,8 +61,13 @@
 			class="navbar min-h-12 w-full border-b border-white border-opacity-20 bg-white bg-opacity-10 shadow-lg backdrop-blur-lg"
 		>
 			<div class="flex-1">
-				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/"
-					>Craft Down Under D1 Manager</a
+				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/">
+					<img
+						src="https://cdn.playcdu.co/Images/Branding/Blue/BH_NU_Asset_6.png"
+						alt="Craft Down Under Logo"
+						class="mr-2 h-8"
+					/>
+					Craft Down Under D1 Manager</a
 				>
 			</div>
 			<div class="flex-none">

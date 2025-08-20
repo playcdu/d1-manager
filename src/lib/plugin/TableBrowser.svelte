@@ -102,6 +102,18 @@
 		if (running) {
 			return;
 		}
+
+		if (!query.trim()) {
+			running = true;
+			try {
+				where = "";
+				await _fetchTableData();
+			} finally {
+				running = false;
+			}
+			return;
+		}
+
 		running = true;
 		error = undefined;
 
