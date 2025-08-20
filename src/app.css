@@ -13,4 +13,9 @@
 html,
 body {
 	@apply absolute m-0 h-full w-full overflow-hidden p-0 transition-colors;
+	background: linear-gradient(135deg, #a855f7, #3b82f6);
+}
+
+.glass {
+	@apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg rounded-lg;
 }

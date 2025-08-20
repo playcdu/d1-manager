@@ -212,7 +212,7 @@
 		<div class="max-h-[80vh] overflow-auto transition-opacity" class:opacity-50={running}>
 			<table class="table-sm table min-w-full">
 				<thead>
-					<tr class="bg-base-200 sticky top-0 z-10 shadow">
+					<tr class="sticky top-0 z-10 shadow glass">
 						{#each cols as col}
 							<th
 								class="!relative cursor-pointer normal-case"
@@ -238,7 +238,7 @@
 									<td>
 										{#if typeof row[key] === "number"}
 											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
+												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent text-white placeholder:text-gray-300"
 												type="number"
 												bind:value={row[key]}
 												on:blur={() => edit(row._, key)}
@@ -249,7 +249,7 @@
 											/>
 										{:else}
 											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
+												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent text-white placeholder:text-gray-300"
 												bind:value={row[key]}
 												on:change={() => edit(row._, key)}
 												disabled={locked || running}
@@ -266,7 +266,7 @@
 									class="pointer-events-none flex items-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
 								>
 									<button
-										class="btn-outline btn-error btn-xs btn"
+										class="btn-outline btn-error btn-xs btn glass"
 										on:click={() => remove(row._)}
 										disabled={locked || running}
 									>
@@ -288,7 +288,7 @@
 	<div class="flex items-center justify-between">
 		{#if offset > 0}
 			<button
-				class="btn-ghost btn-sm btn"
+				class="btn-ghost btn-sm btn glass"
 				on:click={() => {
 					offset -= limit;
 					run();
@@ -310,7 +310,7 @@
 
 		{#if result.length === limit}
 			<button
-				class="btn-ghost btn-sm btn"
+				class="btn-ghost btn-sm btn glass"
 				on:click={() => {
 					offset += limit;
 					run();
@@ -324,7 +324,7 @@
 {/if}
 
 {#if error}
-	<div class="alert alert-error shadow-lg">
+	<div class="alert alert-error shadow-lg glass">
 		<div>{error.error.cause || error.error.message}</div>
 	</div>
 {/if}

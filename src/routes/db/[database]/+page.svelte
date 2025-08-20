@@ -69,12 +69,12 @@
 	/>
 </svelte:head>
 
-<div class="flex w-full flex-col items-center justify-start gap-4 p-4">
-	<div class="card-border card w-full">
+<div class="flex w-full flex-col items-center justify-start gap-4">
+	<div class="card w-full glass">
 		<div class="card-body">
 			<div class="join">
 				<textarea
-					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors"
+					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors glass text-white placeholder:text-gray-300"
 					class:!outline-error={danger}
 					placeholder={$t("execute-sql-query-in-database", {
 						values: { db: $page.params.database },
@@ -85,7 +85,7 @@
 				></textarea>
 				{#if query}
 					<button
-						class="btn-primary btn join-item h-auto min-w-[6rem]"
+						class="btn-primary btn join-item h-auto min-w-[6rem] glass"
 						class:btn-error={danger}
 						on:click={run}
 						disabled={running}
@@ -108,12 +108,12 @@
 	{#each data.db as table}
 		<a class="w-full" href="/db/{$page.params.database}/{table.name}">
 			<div
-				class="card-border card hover:border-primary w-full transition-all hover:shadow-md"
+				class="card w-full transition-all hover:shadow-md glass"
 			>
 				<div class="card-body">
 					<h2 class="card-title">{table.name}</h2>
 
-					<div class="stats">
+					<div class="stats glass">
 						<div class="stat">
 							<div class="stat-title">{$t("rows")}</div>
 							<div class="stat-value">{table.count}</div>
@@ -124,7 +124,7 @@
 
 					<div>
 						<div class="overflow-x-auto">
-							<table class="table-sm bg-base-200 table w-full">
+							<table class="table-sm table w-full">
 								<thead>
 									<tr>
 										<th>{$t("col-name")}</th>

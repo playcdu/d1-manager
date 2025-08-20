@@ -110,7 +110,7 @@
 <div class="w-full">
 	<div class="join w-full">
 		<textarea
-			class="textarea-border textarea join-item h-12 flex-1 resize-y font-sans"
+			class="textarea-border textarea join-item h-12 flex-1 resize-y font-sans glass text-white placeholder:text-gray-300"
 			placeholder={$t("show-first-10-records")}
 			bind:value={query}
 			on:keypress={suggest_handler}
@@ -118,7 +118,7 @@
 		></textarea>
 
 		<button
-			class="btn-primary btn-outline btn join-item h-auto min-w-[6rem]"
+			class="btn-primary btn-outline btn join-item h-auto min-w-[6rem] glass"
 			on:click={suggest}
 			disabled={running}
 		>
@@ -130,7 +130,7 @@
 <div class="w-full">
 	<div class="join w-full">
 		<textarea
-			class="textarea-border textarea join-item h-16 flex-1 resize-y font-mono"
+			class="textarea-border textarea join-item h-16 flex-1 resize-y font-mono glass text-white placeholder:text-gray-300"
 			placeholder={$t("suggestion-will-appear-here")}
 			bind:value={suggestion}
 			on:keypress={run_handler}
@@ -138,7 +138,7 @@
 		></textarea>
 
 		<button
-			class="btn-primary btn join-item h-auto min-w-[6rem]"
+			class="btn-primary btn join-item h-auto min-w-[6rem] glass"
 			class:btn-error={danger}
 			on:click={run}
 			disabled={running}
@@ -149,13 +149,13 @@
 </div>
 
 {#if result}
-	<div class="divider"></div>
+	<div class="divider before:bg-white/20 after:bg-white/20"></div>
 
 	{#if result.results?.length}
 		<div class="max-h-[80vh] overflow-auto">
 			<table class="table-sm table w-full">
 				<thead>
-					<tr class="bg-base-200 sticky top-0 z-10 shadow">
+					<tr class="sticky top-0 z-10 shadow glass">
 						{#each Object.keys(result.results[0]) as key}
 							<th class="!relative normal-case">{key}</th>
 						{/each}
@@ -165,7 +165,7 @@
 					{#each result.results as row}
 						<tr class="hover">
 							{#each Object.values(row) as value}
-								<td class="text-base-content" class:text-opacity-50={value === null}
+								<td class="text-white" class:text-opacity-50={value === null}
 									>{value}</td
 								>
 							{/each}
@@ -192,7 +192,7 @@
 		</p>
 		{#if result.results?.length}
 			<button
-				class="btn-primary btn-outline btn-sm btn"
+				class="btn-primary btn-outline btn-sm btn glass"
 				on:click={() => (result ? export_csv(result.results, table) : undefined)}
 			>
 				{$t("plugin.semantic-query.export")}
@@ -202,9 +202,9 @@
 {/if}
 
 {#if error}
-	<div class="divider"></div>
+	<div class="divider before:bg-white/20 after:bg-white/20"></div>
 
-	<div class="alert alert-error shadow-lg">
+	<div class="alert alert-error shadow-lg glass">
 		<div>{error}</div>
 	</div>
 {/if}

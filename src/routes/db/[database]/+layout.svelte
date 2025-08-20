@@ -43,38 +43,70 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col">
-	<div class="navbar border-base-300 min-h-12 border-b">
-		<div class="flex-1">
-			<a class="px-4 font-bold" href="/db/{$page.params.database}">
-				{$t("n-table-in-db", {
-					values: { db: $page.params.database, n: data.db.length },
-				})}
-			</a>
-		</div>
-		<div class="flex-none gap-2">
-			{#if $page.params.table}
-				<span class="px-4 font-bold">
-					{$page.params.table}
-				</span>
-			{:else}
-				<button class="btn-outline btn-sm btn" on:click={import_db}>
-					{$t("import")}
-				</button>
-				<a
-					class="btn-outline btn-sm btn"
-					href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
-					target="_blank"
-					rel="noreferrer"
-				>
-					{$t("download")}
-				</a>
-			{/if}
+<div class="drawer-mobile drawer h-full w-full">
+	<input id="my-drawer" type="checkbox" class="drawer-toggle" />
+	<div class="drawer-content">
+		<div class="flex h-full w-full flex-col">
+			<div class="navbar min-h-12 glass rounded-none">
+				<div class="flex-1">
+					<label for="my-drawer" class="btn-ghost drawer-button btn-sm btn lg:hidden">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							class="inline-block h-5 w-5 stroke-current"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 6h16M4 12h16M4 18h16"
+							></path></svg
+						>
+					</label>
+					<a class="px-4 font-bold" href="/db/{$page.params.database}">
+						{$t("n-table-in-db", {
+							values: { db: $page.params.database, n: data.db.length },
+						})}
+					</a>
+				</div>
+				<div class="flex-none gap-2">
+					{#if $page.params.table}
+						<span class="px-4 font-bold">
+							{$page.params.table}
+						</span>
+					{:else}
+						<button class="btn-outline btn-sm btn glass" on:click={import_db}>
+							{$t("import")}
+						</button>
+						<a
+							class="btn-outline btn-sm btn glass"
+							href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
+							target="_blank"
+							rel="noreferrer"
+						>
+							{$t("download")}
+						</a>
+					{/if}
+				</div>
+			</div>
+			<div class="w-full flex-1 overflow-y-auto">
+				{#key $page.params.table}
+					<slot />
+				{/key}
+			</div>
 		</div>
 	</div>
-	<div class="w-full flex-1 overflow-y-auto">
-		{#key $page.params.table}
-			<slot />
-		{/key}
+	<div class="drawer-side">
+		<label for="my-drawer" class="drawer-overlay"></label>
+		<ul class="menu w-80 overflow-y-auto bg-transparent p-4 text-white">
+			{#each data.db as table}
+				<li>
+					<a
+						class:active={$page.params.table === table.name}
+						href={`/db/${$page.params.database}/${table.name}`}>{table.name}</a
+					>
+				</li>
+			{/each}
+		</ul>
 	</div>
 </div>

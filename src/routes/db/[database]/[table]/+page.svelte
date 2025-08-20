@@ -44,7 +44,7 @@
 </svelte:head>
 
 <div class="flex w-full flex-col items-center justify-start gap-4">
-	<div class="card w-full">
+	<div class="card w-full glass">
 		<div class="card-body">
 			<div class="mb-4 flex justify-between">
 				<h2 class="card-title">{meta.name}</h2>
@@ -55,7 +55,7 @@
 
 			<div>
 				<div class="overflow-x-auto">
-					<table class="table-sm bg-base-200 table w-full">
+					<table class="table-sm table w-full">
 						<thead>
 							<tr>
 								<th>{$t("col-name")}</th>
@@ -79,12 +79,12 @@
 			<div class="divider"></div>
 
 			<select
-				class="select-border select max-w-xs"
+				class="select-border select max-w-xs glass text-white"
 				bind:value={plugin}
 				on:click={preload_plugins}
 			>
 				{#each Object.keys(plugins) as name}
-					<option value={name}>{$t(`plugin.${name}.name`)}</option>
+					<option class="text-black" value={name}>{$t(`plugin.${name}.name`)}</option>
 				{/each}
 			</select>
 
@@ -99,5 +99,3 @@
 		</div>
 	</div>
 </div>
-
-<SidePanel {data} />

@@ -155,7 +155,7 @@
 
 <table class="table">
 	<thead>
-		<tr class="bg-base-200">
+		<tr class="glass">
 			<th class="w-40">{$t("plugin.add-record.column")}</th>
 			<th>{$t("plugin.add-record.value")}</th>
 		</tr>
@@ -168,7 +168,7 @@
 					{#if input_type(col.type) !== "file"}
 						<div class="w-full">
 							<input
-								class="input-border input input-sm w-full transition-colors"
+								class="input-border input input-sm w-full transition-colors glass text-white placeholder:text-gray-300"
 								class:input-error={record[col.name].err}
 								type={input_type(col.type)}
 								on:input={(e) => {
@@ -199,12 +199,12 @@
 	</tbody>
 </table>
 
-<button class="btn-primary btn" on:click={add} disabled={running}>
+<button class="btn-primary btn glass" on:click={add} disabled={running}>
 	{$t("plugin.add-record.add")}
 </button>
 
 {#if result}
-	<div class="alert alert-success">
+	<div class="alert alert-success glass">
 		<h3>{$t("plugin.add-record.success")}</h3>
 		<p class="mt-2 text-sm opacity-70">
 			{$t("plugin.add-record.n-ms", {
@@ -215,7 +215,7 @@
 		</p>
 	</div>
 {:else if error}
-	<div class="alert alert-error">
+	<div class="alert alert-error glass">
 		<h3>{$t("plugin.add-record.error")}</h3>
 		<p>{error.error.cause || error.error.message}</p>
 	</div>

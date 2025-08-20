@@ -59,25 +59,25 @@
 
 <div class="w-full">
 	<textarea
-		class="textarea-border textarea h-24 w-full resize-y font-mono"
+		class="textarea-border textarea h-24 w-full resize-y font-mono glass text-white placeholder:text-gray-300"
 		placeholder="SELECT COUNT(*) AS c FROM {table}"
 		bind:value={query}
 		on:keypress={handler}
 	></textarea>
 </div>
 
-<button class="btn-primary btn" class:btn-error={danger} on:click={run} disabled={running}
+<button class="btn-primary btn glass" class:btn-error={danger} on:click={run} disabled={running}
 	>{$t("plugin.run-query.run")}</button
 >
 
 {#if result}
-	<div class="divider"></div>
+	<div class="divider before:bg-white/20 after:bg-white/20"></div>
 
 	{#if result?.results?.length}
 		<div class="max-h-[80vh] overflow-auto">
 			<table class="table-sm table w-full">
 				<thead>
-					<tr class="bg-base-200 sticky top-0 z-10 shadow">
+					<tr class="sticky top-0 z-10 shadow glass">
 						{#each Object.keys(result.results[0]) as key}
 							<th class="!relative normal-case">{key}</th>
 						{/each}
@@ -87,7 +87,7 @@
 					{#each result.results as row}
 						<tr class="hover">
 							{#each Object.values(row) as value}
-								<td class="text-base-content" class:text-opacity-50={value === null}
+								<td class="text-white" class:text-opacity-50={value === null}
 									>{value}</td
 								>
 							{/each}
@@ -114,7 +114,7 @@
 		</p>
 		{#if result?.results?.length}
 			<button
-				class="btn-primary btn-outline btn-sm btn"
+				class="btn-primary btn-outline btn-sm btn glass"
 				on:click={() => (result ? export_csv(result.results, table) : undefined)}
 			>
 				{$t("plugin.run-query.export")}
@@ -124,9 +124,9 @@
 {/if}
 
 {#if error}
-	<div class="divider"></div>
+	<div class="divider before:bg-white/20 after:bg-white/20"></div>
 
-	<div class="alert alert-error shadow-lg">
+	<div class="alert alert-error shadow-lg glass">
 		<div>{error}</div>
 	</div>
 {/if}

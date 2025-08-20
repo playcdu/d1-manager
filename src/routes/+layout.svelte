@@ -45,8 +45,8 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col">
-	<div class="navbar bg-base-200 min-h-12">
+<div class="flex h-full w-full flex-col text-white">
+	<div class="navbar glass min-h-12 rounded-none">
 		<div class="flex-1">
 			<a
 				class="btn-ghost btn-sm btn text-xl normal-case"
@@ -56,18 +56,18 @@
 		</div>
 		<div class="flex-none">
 			<select
-				class="select-border select select-sm w-full max-w-xs"
+				class="select-border select select-sm w-full max-w-xs glass"
 				bind:value={database}
 				on:click={preload}
 			>
-				<option value="" disabled selected>{$t("select-database")}</option>
+				<option class="text-black" value="" disabled selected>{$t("select-database")}</option>
 				{#each data.dbms as db}
-					<option value={db}>{db}</option>
+					<option class="text-black" value={db}>{db}</option>
 				{/each}
 			</select>
 		</div>
 	</div>
-	<div class="w-full flex-1 overflow-y-auto">
+	<div class="w-full flex-1 overflow-y-auto p-4">
 		<slot />
 	</div>
 </div>

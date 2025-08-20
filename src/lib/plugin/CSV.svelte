@@ -177,10 +177,10 @@
 	}
 </script>
 
-<div class="w-full rounded-lg border p-4">
+<div class="w-full rounded-lg p-4 glass">
 	<p class="card-title">{$t("plugin.csv.import-csv")}</p>
 
-	<div class="divider"></div>
+	<div class="divider before:bg-white/20 after:bg-white/20"></div>
 
 	<div class="w-full">
 		<label class="label" for="csv">
@@ -189,7 +189,7 @@
 		<input
 			id="csv"
 			type="file"
-			class="file-input-border file-input w-full"
+			class="file-input-border file-input w-full glass"
 			bind:files
 			accept=".csv"
 			on:change={read}
@@ -205,7 +205,7 @@
 		<div class="my-2 max-h-[70vh] overflow-auto">
 			<table class="table-sm table w-full">
 				<thead>
-					<tr class="bg-base-200 sticky top-0 z-10 shadow">
+					<tr class="sticky top-0 z-10 shadow glass">
 						{#each keys as key}
 							<th class="!relative normal-case">{key}</th>
 						{/each}
@@ -215,7 +215,7 @@
 					{#each casted as row}
 						<tr class="hover">
 							{#each row as value}
-								<td class="text-base-content">{value}</td>
+								<td class="text-white">{value}</td>
 							{/each}
 						</tr>
 					{/each}
@@ -223,7 +223,7 @@
 			</table>
 		</div>
 
-		<button class="btn-primary btn w-full" on:click={import_csv} disabled={running}>
+		<button class="btn-primary btn w-full glass" on:click={import_csv} disabled={running}>
 			{$t("plugin.csv.import")}
 		</button>
 	{/if}
@@ -239,12 +239,12 @@
 	{/if}
 </div>
 
-<div class="w-full rounded-lg border p-4">
+<div class="w-full rounded-lg p-4 glass">
 	<p class="card-title">{$t("plugin.csv.export-csv")}</p>
 
-	<div class="divider"></div>
+	<div class="divider before:bg-white/20 after:bg-white/20"></div>
 
-	<button class="btn-primary btn w-full" on:click={export_csv} disabled={running}>
+	<button class="btn-primary btn w-full glass" on:click={export_csv} disabled={running}>
 		{$t("plugin.csv.export")}
 	</button>
 </div>
