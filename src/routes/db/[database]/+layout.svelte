@@ -5,8 +5,6 @@
 	import { sqlite2sql } from "$lib/sqlite2sql";
 	import { invalidateAll } from "$app/navigation";
 
-	export let data: LayoutData;
-
 	async function import_db() {
 		const file = document.createElement("input");
 		file.type = "file";
