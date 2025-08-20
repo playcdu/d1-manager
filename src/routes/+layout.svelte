@@ -52,66 +52,55 @@
 	<title>Craft Down Under D1 Manager</title>
 </svelte:head>
 
-<div class="drawer lg:drawer-open">
-	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-	<div class="drawer-content flex flex-col items-center justify-center">
-		<div class="navbar bg-base-200 min-h-12 w-full">
-			<div class="flex-1">
-				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/">
+<div class="flex h-screen bg-gray-100 text-gray-800">
+	<!-- Sidebar -->
+	<div class="w-80 flex-shrink-0 bg-gray-800 text-white">
+		<div class="flex h-full flex-col">
+			<div class="flex h-16 flex-shrink-0 items-center justify-center bg-gray-900 px-4">
+				<a class="flex items-center text-xl font-semibold" href="/">
 					<img
 						src="https://cdn.playcdu.co/Images/Branding/Blue/BH_NU_Asset_6.png"
 						alt="Craft Down Under Logo"
 						class="mr-2 h-8"
 					/>
-					Craft Down Under D1 Manager</a
-				>
+					<span>Craft Down Under D1 Manager</span>
+				</a>
 			</div>
-			<div class="flex-none">
-				<label for="my-drawer-2" class="btn-primary drawer-button btn lg:hidden">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h7"
-						/>
-					</svg>
-				</label>
+			<div class="flex-1 overflow-y-auto p-4">
+				<h2 class="mb-2 text-sm font-bold uppercase tracking-wider text-gray-400">Databases</h2>
+				<div class="flex flex-col gap-2">
+					{#each data.dbms as db}
+						<a
+							href="/db/{db}"
+							class="rounded-md px-4 py-2 text-left"
+							class:bg-gray-700={$page.params.database === db}
+							>{db}</a
+						>
+					{/each}
+				</div>
+				<hr class="my-4 border-gray-700" />
+				<h2 class="mb-2 text-sm font-bold uppercase tracking-wider text-gray-400">Tables</h2>
+				{#if tables.length > 0}
+					<div class="flex flex-col gap-2">
+						{#each tables as table}
+							<a
+								href={`/db/${$page.params.database}/${table.name}`}
+								class="rounded-md px-4 py-2"
+								class:bg-gray-700={$page.params.table === table.name}
+							>
+								{table.name}
+							</a>
+						{/each}
+					</div>
+				{/if}
 			</div>
-		</div>
-		<div class="w-full flex-1 overflow-y-auto p-4">
-			<h2 class="mb-2 text-sm font-bold uppercase tracking-wider">Databases</h2>
-			<div class="btn-group mb-4">
-				{#each data.dbms as db}
-					<a href="/db/{db}" class="btn" class:btn-active={$page.params.database === db}>{db}</a>
-				{/each}
-			</div>
-			<slot />
 		</div>
 	</div>
-	<div class="drawer-side">
-		<label for="my-drawer-2" class="drawer-overlay"></label>
-		<ul class="menu min-h-full w-80 bg-base-200 p-4 text-base-content">
-			<!-- Sidebar content here -->
-			<li class="menu-title">{$t('tables')}</li>
-			{#if tables.length > 0}
-				{#each tables as table}
-					<li>
-						<a
-							href={`/db/${$page.params.database}/${table.name}`}
-							class:active={$page.params.table === table.name}
-						>
-							{table.name}
-						</a>
-					</li>
-				{/each}
-			{/if}
-		</ul>
+
+	<!-- Main content -->
+	<div class="flex flex-1 flex-col overflow-hidden">
+		<div class="flex-1 overflow-y-auto p-4">
+			<slot />
+		</div>
 	</div>
 </div>

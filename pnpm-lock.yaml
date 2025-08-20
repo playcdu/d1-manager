@@ -55,9 +55,6 @@ importers:
             csv-stringify:
                 specifier: ^6.5.2
                 version: 6.5.2
-            daisyui:
-                specifier: ^5.0.34
-                version: 5.0.34
             debug:
                 specifier: ^4.4.0
                 version: 4.4.0
@@ -2403,12 +2400,6 @@ packages:
                 integrity: sha512-MOqHvMWF9/9MX6nza0KgvFH4HpMU0EF5uUDXqX/BtxtU8NfB0QzRtJ8Oe/6SuS4kbhyzVJwjd97EA4PKrzJ8bw==,
             }
         engines: { node: ">=0.12" }
-
-    daisyui@5.0.34:
-        resolution:
-            {
-                integrity: sha512-UuAGL43FIh98+BK+eW3S056SmBWyK1eg0JpD8W/+eNx0NcPEt39eChra9tW/j1nWSpTzD0qRmMYnpt3jjzuTMQ==,
-            }
 
     data-uri-to-buffer@2.0.2:
         resolution:
@@ -6283,8 +6274,6 @@ snapshots:
         dependencies:
             es5-ext: 0.10.64
             type: 2.7.3
-
-    daisyui@5.0.34: {}
 
     data-uri-to-buffer@2.0.2: {}
 
