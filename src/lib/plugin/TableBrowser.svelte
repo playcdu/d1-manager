@@ -116,21 +116,41 @@
 				});
 				if (res.ok) {
 					const json = await res.json();
-					where = json.sql.replace(/^`|"$/g, '').replace(/`/g, '`');
-					await _fetchTableData();
+					const sql_to_run = json.sql;
+
+					// now execute the query
+					const query_res = await fetch(`/api/db/${database}/all`, {
+						method: 'POST',
+						body: JSON.stringify({ query: sql_to_run })
+					});
+					const query_json = await query_res.json();
+					if (query_res.ok) {
+						if ('results' in query_json) {
+							result = query_json.results;
+						} else {
+							result = [];
+						}
+						last_run_sql = sql_to_run;
+						is_custom_sql_result = true;
+					} else {
+						if ('message' in query_json) {
+							throw new Error(query_json.message);
+						}
+						throw new Error('SQL query failed');
+					}
 				} else {
 					throw new Error(await res.text());
 				}
 			} else {
 				where = '';
 				const res = await fetch(`/api/db/${database}/all`, {
-					method: "POST",
+					method: 'POST',
 					body: JSON.stringify({ query })
 				});
 
 				const json = await res.json();
 				if (res.ok) {
-					if ("results" in json) {
+					if ('results' in json) {
 						result = json.results;
 					} else {
 						result = [];
@@ -138,10 +158,10 @@
 					last_run_sql = query;
 					is_custom_sql_result = true;
 				} else {
-					if ("message" in json) {
+					if ('message' in json) {
 						throw new Error(json.message);
 					}
-					throw new Error("SQL query failed");
+					throw new Error('SQL query failed');
 				}
 			}
 		} catch (err) {
@@ -281,26 +301,24 @@
 	</label>
 </div>
 
+<div class="tabs-boxed tabs mb-2 w-max">
+	<a
+		class="tab"
+		class:tab-active={query_mode === 'semantic'}
+		on:click={() => (query_mode = 'semantic')}>Semantic</a
+	>
+	<a class="tab" class:tab-active={query_mode === 'sql'} on:click={() => (query_mode = 'sql')}
+		>SQL</a
+	>
+</div>
 <form class="form-control" on:submit|preventDefault={run_query}>
 	<div class="input-group">
 		<input
 			type="text"
-			placeholder="Enter a semantic query..."
+			placeholder={query_mode === 'semantic' ? 'Enter a semantic query...' : 'Enter an SQL query...'}
 			class="input-bordered input w-full"
 			bind:value={query}
 		/>
-		<div class="tabs-boxed tabs">
-			<a
-				class="tab"
-				class:tab-active={query_mode === 'semantic'}
-				on:click={() => (query_mode = 'semantic')}>Semantic</a
-			>
-			<a
-				class="tab"
-				class:tab-active={query_mode === 'sql'}
-				on:click={() => (query_mode = 'sql')}>SQL</a
-			>
-		</div>
 		<button type="submit" class="btn btn-primary">Query</button>
 	</div>
 </form>
