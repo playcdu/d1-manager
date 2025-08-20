@@ -59,26 +59,85 @@
 			running = false;
 		}
 	}
+
+	async function import_db() {
+		const file = document.createElement('input');
+		file.type = 'file';
+		file.accept = '.sqlite3,.sqlite,.db,.sql';
+		file.onchange = async () => {
+			if (file.files?.length !== 1) {
+				return;
+			}
+
+			const db = file.files[0];
+			let sql: string;
+			if (db.name.endsWith('.sql')) {
+				sql = await db.text();
+			} else {
+				sql = await sqlite2sql(await db.arrayBuffer());
+			}
+
+			console.log(sql);
+
+			const res = await fetch(`/api/db/${$page.params.database}/exec`, {
+				method: 'POST',
+				body: JSON.stringify({ query: sql })
+			});
+
+			if (res.ok) {
+				await invalidateAll();
+			} else {
+				alert(await res.text());
+			}
+
+			file.remove();
+		};
+		file.click();
+	}
 </script>
 
 <svelte:head>
-	<title>{$page.params.database} | {$t("d1-manager.name")}</title>
+	<title>{$page.params.database} | Craft Down Under</title>
 	<meta
 		name="description"
-		content={$t("d1-manager-manage-db", { values: { db: $page.params.database } })}
+		content="Manage the {$page.params.database} database."
 	/>
 </svelte:head>
 
 <div class="flex w-full flex-col items-center justify-start gap-4 p-4">
+	<div class="stats shadow">
+		<div class="stat">
+			<div class="stat-title">{$t('tables')}</div>
+			<div class="stat-value">{data.db.length}</div>
+		</div>
+
+		<div class="stat">
+			<div class="stat-title">{$t('total-rows')}</div>
+			<div class="stat-value">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
+		</div>
+	</div>
+
+	<div class="flex gap-2">
+		<button class="btn-outline btn-sm btn" on:click={import_db}>
+			{$t('import')}
+		</button>
+		<a
+			class="btn-outline btn-sm btn"
+			href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
+			target="_blank"
+			rel="noreferrer"
+		>
+			{$t('download')}
+		</a>
+	</div>
+
 	<div class="card-border card w-full">
 		<div class="card-body">
 			<div class="join">
 				<textarea
 					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors"
 					class:!outline-error={danger}
-					placeholder={$t("execute-sql-query-in-database", {
-						values: { db: $page.params.database },
-					})}
+					placeholder="Execute SQL query in {$page.params.database}"
 					bind:value={query}
 					on:keypress={handler}
 					disabled={running}
@@ -99,53 +158,9 @@
 				<div class="text-error mt-2">{error}</div>
 			{:else if duration}
 				<div class="mt-2 text-sm">
-					{$t("n-ms", { values: { n: duration.toFixed(2) } })}
+					{$t('n-ms', { values: { n: duration.toFixed(2) } })}
 				</div>
 			{/if}
 		</div>
 	</div>
-
-	{#each data.db as table}
-		<a class="w-full" href="/db/{$page.params.database}/{table.name}">
-			<div
-				class="card-border card hover:border-primary w-full transition-all hover:shadow-md"
-			>
-				<div class="card-body">
-					<h2 class="card-title">{table.name}</h2>
-
-					<div class="stats">
-						<div class="stat">
-							<div class="stat-title">{$t("rows")}</div>
-							<div class="stat-value">{table.count}</div>
-						</div>
-					</div>
-
-					<div class="divider"></div>
-
-					<div>
-						<div class="overflow-x-auto">
-							<table class="table-sm bg-base-200 table w-full">
-								<thead>
-									<tr>
-										<th>{$t("col-name")}</th>
-										<th>{$t("col-type")}</th>
-										<th>{$t("col-default")}</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each table.columns as column}
-										<tr class="hover" class:font-bold={column.pk}>
-											<td>{column.name}</td>
-											<td>{column.type}</td>
-											<td>{column.dflt_value}</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</a>
-	{/each}
 </div>

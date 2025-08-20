@@ -10,14 +10,23 @@
 	import "../app.css";
 	import type { LayoutData } from "./$types";
 	import { preloadData } from "$app/navigation";
+	import type { PluginData } from '$lib/plugin/type';
 
 	export let data: LayoutData;
-	let database = $page.params.database || "";
-	$: {
-		if (browser && database && database !== $page.params.database) {
-			goto(`/db/${database}`);
+	let tables: PluginData["db"] = [];
+
+	async function fetch_tables() {
+		if ($page.params.database) {
+			const res = await fetch(`/api/db/${$page.params.database}`);
+			if (res.ok) {
+				tables = await res.json();
+			}
+		} else {
+			tables = [];
 		}
 	}
+
+	$: $page.params.database, browser && fetch_tables();
 
 	let lang = writable<string | null | undefined>(undefined);
 
@@ -35,39 +44,64 @@
 	});
 
 	function preload() {
-		if (database) {
-			if (data.dbms.length > 1) {
-				preloadData(`/db/${database === data.dbms[0] ? data.dbms[1] : data.dbms[0]}`);
-			}
-		} else if (data.dbms[0]) {
+		if (data.dbms.length > 1) {
 			preloadData(`/db/${data.dbms[0]}`);
 		}
 	}
 </script>
 
-<div class="flex h-full w-full flex-col">
-	<div class="navbar bg-base-200 min-h-12">
-		<div class="flex-1">
-			<a
-				class="btn-ghost btn-sm btn text-xl normal-case"
-				href="/"
-				on:click={() => (database = "")}>D1 Manager</a
-			>
+<div class="drawer lg:drawer-open">
+	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+	<div class="drawer-content flex flex-col items-center justify-center">
+		<div class="navbar bg-base-200 min-h-12 w-full">
+			<div class="flex-1">
+				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/">Craft Down Under</a>
+			</div>
+			<div class="flex-none">
+				<label for="my-drawer-2" class="btn-primary drawer-button btn lg:hidden">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h7"
+						/>
+					</svg>
+				</label>
+			</div>
 		</div>
-		<div class="flex-none">
-			<select
-				class="select-border select select-sm w-full max-w-xs"
-				bind:value={database}
-				on:click={preload}
-			>
-				<option value="" disabled selected>{$t("select-database")}</option>
-				{#each data.dbms as db}
-					<option value={db}>{db}</option>
-				{/each}
-			</select>
+		<div class="tabs-boxed tabs">
+			{#each data.dbms as db}
+				<a href="/db/{db}" class="tab" class:tab-active={$page.params.database === db}>{db}</a>
+			{/each}
+		</div>
+		<div class="w-full flex-1 overflow-y-auto">
+			<slot />
 		</div>
 	</div>
-	<div class="w-full flex-1 overflow-y-auto">
-		<slot />
+	<div class="drawer-side">
+		<label for="my-drawer-2" class="drawer-overlay"></label>
+		<ul class="menu min-h-full w-80 bg-base-200 p-4 text-base-content">
+			<!-- Sidebar content here -->
+			<li class="menu-title">{$t("tables")}</li>
+			{#if tables.length > 0}
+				{#each tables as table}
+					<li>
+						<a
+							href={`/db/${$page.params.database}/${table.name}`}
+							class:active={$page.params.table === table.name}
+						>
+							{table.name}
+						</a>
+					</li>
+				{/each}
+			{/if}
+		</ul>
 	</div>
 </div>

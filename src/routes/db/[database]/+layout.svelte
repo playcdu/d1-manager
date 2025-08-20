@@ -43,38 +43,4 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col">
-	<div class="navbar border-base-300 min-h-12 border-b">
-		<div class="flex-1">
-			<a class="px-4 font-bold" href="/db/{$page.params.database}">
-				{$t("n-table-in-db", {
-					values: { db: $page.params.database, n: data.db.length },
-				})}
-			</a>
-		</div>
-		<div class="flex-none gap-2">
-			{#if $page.params.table}
-				<span class="px-4 font-bold">
-					{$page.params.table}
-				</span>
-			{:else}
-				<button class="btn-outline btn-sm btn" on:click={import_db}>
-					{$t("import")}
-				</button>
-				<a
-					class="btn-outline btn-sm btn"
-					href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
-					target="_blank"
-					rel="noreferrer"
-				>
-					{$t("download")}
-				</a>
-			{/if}
-		</div>
-	</div>
-	<div class="w-full flex-1 overflow-y-auto">
-		{#key $page.params.table}
-			<slot />
-		{/key}
-	</div>
-</div>
+<slot />
