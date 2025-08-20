@@ -80,6 +80,6 @@
 	},
 	"packageManager": "pnpm@10.10.0",
 	"dependencies": {
-		"@tanstack/svelte-table": "8.0.0-beta.9"
+		"svelte-table": "^0.6.5"
 	}
 }

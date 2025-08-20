@@ -1,15 +1,8 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
-	import {
-		createTable,
-		createRender,
-		getCoreRowModel,
-		getSortedRowModel,
-		type RowData,
-	} from "@tanstack/svelte-table";
 	import { onMount } from "svelte";
 	import { t } from "svelte-i18n";
-	import type { PluginData } from "./type";
+	import SvelteTable from "svelte-table";
 	import ActionsCell from "./ActionsCell.svelte";
 	import TableCell from "./TableCell.svelte";
 
@@ -20,12 +13,6 @@
 	type Doc = {
 		[key: string]: unknown;
 	};
-
-	declare module "@tanstack/svelte-table" {
-		interface ColumnMeta<TData extends RowData, TValue> {
-			is_number?: boolean;
-		}
-	}
 
 	let locked = true;
 	let offset = 0;
@@ -309,74 +296,45 @@
 
 	$: columns =
 		result && result.length > 0
-			? Object.keys(result[0]).map((key) => {
-					if (key === "_") {
-						return;
-					}
+			? [
+					...Object.keys(result[0]).map((key) => {
+						if (key === "_") {
+							return;
+						}
 
-					const is_number = typeof result?.[0]?.[key] === "number";
+						const is_number = typeof result?.[0]?.[key] === "number";
 
-					return tableInstance.createDataColumn(key, {
-						header: () => key,
-						meta: {
-							is_number,
-						},
-						cell: (info) => {
-							return createRender(TableCell, {
-								value: info.getValue(),
-								row: info.row,
-								edit,
+						return {
+							key: key,
+							title: key,
+							sortable: true,
+							renderComponent: {
+								component: TableCell,
+								props: {
+									edit,
+									locked,
+									running,
+									is_number,
+									key,
+									result,
+								},
+							},
+						};
+					}),
+					{
+						key: "actions",
+						title: "Actions",
+						renderComponent: {
+							component: ActionsCell,
+							props: {
+								remove,
 								locked,
 								running,
-								is_number,
-								key,
-								result,
-							});
+							},
 						},
-					});
-				})
-			: [];
-
-	$: tableData = result || [];
-
-	const tableInstance = createTable({
-		get data() {
-			return tableData;
-		},
-		get columns() {
-			return [
-				...(columns || []).filter((c) => c),
-				tableInstance.createDisplayColumn({
-					id: "actions",
-					cell: (info) => {
-						return createRender(ActionsCell, {
-							row: info.row,
-							remove,
-							locked,
-							running,
-						});
 					},
-				}),
-			];
-		},
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		onSortingChange: (updater) => {
-			const new_sorting_state =
-				typeof updater === "function" ? updater(tableInstance.getState().sorting) : updater;
-
-			if (new_sorting_state.length === 0) {
-				order = "";
-				dir = "ASC";
-			} else {
-				const [new_sort] = new_sorting_state;
-				order = new_sort.id;
-				dir = new_sort.desc ? "DESC" : "ASC";
-			}
-
-			run();
-		},
-	});
+				].filter((c) => c)
+			: [];
 </script>
 
 <div class="pt-4 pb-2">
@@ -441,43 +399,7 @@
 			class="max-h-[80vh] overflow-auto rounded-lg border border-white/20 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 			class:opacity-50={running}
 		>
-			<table class="table min-w-full">
-				<thead class="bg-white/60 backdrop-blur-lg">
-					{#each tableInstance.getHeaderGroups() as headerGroup}
-						<tr>
-							{#each headerGroup.headers as header}
-								<th class="!relative normal-case">
-									<button
-										class="flex w-full items-center justify-between"
-										on:click={header.column.getToggleSortingHandler()}
-									>
-										{#if !header.isPlaceholder}
-											<svelte:component
-												this={header.column.columnDef.header}
-											/>
-										{/if}
-										{{
-											asc: " 🔼",
-											desc: " 🔽",
-										}[header.column.getIsSorted() as string] ?? ""}
-									</button>
-								</th>
-							{/each}
-						</tr>
-					{/each}
-				</thead>
-				<tbody>
-					{#each tableInstance.getRowModel().rows as row}
-						<tr class="group hover">
-							{#each row.getVisibleCells() as cell}
-								<td class="border">
-									<svelte:component this={cell.render()} />
-								</td>
-							{/each}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+			<SvelteTable {columns} rows={result}></SvelteTable>
 		</div>
 	{:else}
 		<p class="mt-4">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from 'svelte-i18n';
+	import { t } from "svelte-i18n";
 
 	export let value: unknown;
 	export let row: any;
@@ -14,16 +14,16 @@
 	const onchange = (e: Event) => {
 		const target = e.target as HTMLInputElement;
 		value = target.value;
-		result[row.index][key] = is_number ? Number(value) : value;
-		edit(row.original._);
+		result[row.$rownum][key] = is_number ? Number(value) : value;
+		edit(row._);
 	};
 </script>
 
 <input
-	class="input-ghost input input-xs w-full hover:input-border text-base transition-all disabled:bg-transparent"
-	type={is_number ? 'number' : 'text'}
+	class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+	type={is_number ? "number" : "text"}
 	{value}
 	on:change={onchange}
 	disabled={locked || running}
-	title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
+	title={locked ? $t("plugin.table-browser.table-is-locked") : undefined}
 />
