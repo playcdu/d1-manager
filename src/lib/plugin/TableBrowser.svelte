@@ -20,6 +20,10 @@
 	let order = "";
 	let dir: "ASC" | "DESC" = "ASC";
 	let select = "*";
+	let where = "";
+
+	let query_mode: "semantic" | "sql" = "semantic";
+	let query = "";
 
 	let running = false;
 	let result: Record<string, unknown>[] | undefined;
@@ -51,6 +55,9 @@
 				params.set("order", order);
 				params.set("dir", dir);
 			}
+			if (where) {
+				params.set("where", where);
+			}
 			const res = await fetch(`/api/db/${database}/${table}/data?${params.toString()}`);
 
 			const json = await res.json<typeof result | typeof error>();
@@ -77,6 +84,31 @@
 			result = undefined;
 		} finally {
 			running = false;
+		}
+	}
+
+	async function run_query() {
+		if (running) {
+			return;
+		}
+		running = true;
+
+		if (query_mode === "semantic") {
+			const res = await fetch(`/api/db/${database}/assistant`, {
+				method: "POST",
+				body: JSON.stringify({
+					table,
+					query,
+				}),
+			});
+			if (res.ok) {
+				const sql = await res.text();
+				where = sql;
+				run();
+			}
+		} else {
+			where = query;
+			run();
 		}
 	}
 
@@ -205,6 +237,28 @@
 			{$t("plugin.table-browser.table-is-unlocked-click-to-lock")}
 		</div>
 	</label>
+</div>
+
+<div class="form-control">
+	<div class="input-group">
+		<input
+			type="text"
+			placeholder="Enter a semantic query..."
+			class="input-bordered input w-full"
+			bind:value={query}
+			on:keydown={(e) => e.key === "Enter" && run_query()}
+		/>
+		<div class="tabs-boxed tabs">
+			<a
+				class="tab"
+				class:tab-active={query_mode === "semantic"}
+				on:click={() => (query_mode = "semantic")}>Semantic</a
+			>
+			<a class="tab" class:tab-active={query_mode === "sql"} on:click={() => (query_mode = "sql")}
+				>SQL</a
+			>
+		</div>
+	</div>
 </div>
 
 {#if result}

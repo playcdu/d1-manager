@@ -11,8 +11,6 @@
 
 	const plugins = {
 		["table-browser"]: () => import("$lib/plugin/TableBrowser.svelte"),
-		["run-query"]: () => import("$lib/plugin/RunQuery.svelte"),
-		["semantic-query"]: () => import("$lib/plugin/SemanticQuery.svelte"),
 		["add-record"]: () => import("$lib/plugin/AddRecord.svelte"),
 		["csv"]: () => import("$lib/plugin/CSV.svelte"),
 	};
