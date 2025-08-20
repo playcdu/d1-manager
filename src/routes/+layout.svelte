@@ -55,7 +55,9 @@
 	<div class="drawer-content flex flex-col items-center justify-center">
 		<div class="navbar bg-base-200 min-h-12 w-full">
 			<div class="flex-1">
-				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/">Craft Down Under</a>
+				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/"
+					>Craft Down Under D1 Manager</a
+				>
 			</div>
 			<div class="flex-none">
 				<label for="my-drawer-2" class="btn-primary drawer-button btn lg:hidden">
@@ -76,12 +78,15 @@
 				</label>
 			</div>
 		</div>
-		<div class="tabs-boxed tabs">
-			{#each data.dbms as db}
-				<a href="/db/{db}" class="tab" class:tab-active={$page.params.database === db}>{db}</a>
-			{/each}
+		<div class="p-4">
+			<h2 class="mb-2 text-sm font-bold uppercase tracking-wider">Databases</h2>
+			<div class="btn-group">
+				{#each data.dbms as db}
+					<a href="/db/{db}" class="btn" class:btn-active={$page.params.database === db}>{db}</a>
+				{/each}
+			</div>
 		</div>
-		<div class="w-full flex-1 overflow-y-auto">
+		<div class="w-full flex-1 overflow-y-auto px-4 pb-4">
 			<slot />
 		</div>
 	</div>

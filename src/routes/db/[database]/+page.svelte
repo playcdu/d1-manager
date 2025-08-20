@@ -107,12 +107,12 @@
 <div class="flex w-full flex-col items-center justify-start gap-4 p-4">
 	<div class="stats shadow">
 		<div class="stat">
-			<div class="stat-title">{$t('tables')}</div>
+			<div class="stat-title">{$t("tables")}</div>
 			<div class="stat-value">{data.db.length}</div>
 		</div>
 
 		<div class="stat">
-			<div class="stat-title">{$t('total-rows')}</div>
+			<div class="stat-title">{$t("total-rows")}</div>
 			<div class="stat-value">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
 		</div>
 	</div>

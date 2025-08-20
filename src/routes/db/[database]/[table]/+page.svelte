@@ -17,7 +17,7 @@
 		["csv"]: () => import("$lib/plugin/CSV.svelte"),
 	};
 
-	let plugin: keyof typeof plugins | undefined;
+	let plugin: keyof typeof plugins | undefined = "table-browser";
 	let PluginComponent: ConstructorOfATypedSvelteComponent | undefined;
 	$: {
 		if (plugin) {
