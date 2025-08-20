@@ -50,10 +50,16 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Craft Down Under D1 Manager</title>
+</svelte:head>
+
 <div class="drawer lg:drawer-open">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content flex flex-col items-center justify-center">
-		<div class="navbar bg-base-200 min-h-12 w-full">
+		<div
+			class="navbar min-h-12 w-full border-b border-white border-opacity-20 bg-white bg-opacity-10 shadow-lg backdrop-blur-lg"
+		>
 			<div class="flex-1">
 				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/"
 					>Craft Down Under D1 Manager</a
@@ -92,9 +98,11 @@
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer-2" class="drawer-overlay"></label>
-		<ul class="menu min-h-full w-80 bg-base-200 p-4 text-base-content">
+		<ul
+			class="menu min-h-full w-80 border-r border-white border-opacity-20 bg-white bg-opacity-10 p-4 text-base-content backdrop-blur-lg"
+		>
 			<!-- Sidebar content here -->
-			<li class="menu-title">{$t("tables")}</li>
+			<li class="menu-title">{$t('tables')}</li>
 			{#if tables.length > 0}
 				{#each tables as table}
 					<li>
@@ -107,6 +115,14 @@
 					</li>
 				{/each}
 			{/if}
+			<div class="grow"></div>
+			<li>
+				<label class="swap swap-rotate">
+					<input type="checkbox" data-toggle-theme="dark,light" />
+					<div class="swap-on">THEME</div>
+					<div class="swap-off">THEME</div>
+				</label>
+			</li>
 		</ul>
 	</div>
 </div>

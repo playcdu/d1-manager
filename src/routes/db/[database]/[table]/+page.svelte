@@ -43,7 +43,9 @@
 </svelte:head>
 
 <div class="flex w-full flex-col items-center justify-start gap-4">
-	<div class="card w-full">
+	<div
+		class="card w-full border border-white border-opacity-20 bg-white bg-opacity-10 shadow-lg backdrop-blur-lg"
+	>
 		<div class="card-body">
 			<div role="tablist" class="tabs-lifted tabs">
 				{#each Object.keys(plugins) as name}
