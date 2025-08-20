@@ -4,12 +4,18 @@
 	import { is_dangerous } from "$lib/sql";
 	import { t } from "svelte-i18n";
 	import type { PageData } from "./$types";
-	import { sqlite2sql } from "$lib/sqlite2sql";
 
 	export let data: PageData;
 
 	let query = "";
 	$: danger = is_dangerous(query);
+
+	function handler(evt: KeyboardEvent) {
+		if (evt.code === "Enter" && evt.shiftKey === true && query) {
+			run();
+		}
+	}
+
 	let running = false;
 	let duration: number | undefined;
 	let error = "";
@@ -18,16 +24,18 @@
 			return;
 		}
 		running = true;
+
 		try {
 			const q = query
 				.split(";")
 				.filter((q) => q.trim())
-				.map((q) => q.replace(/\\n/g, "\n"))
-				.join(";\n");
+				.map((q) => q.replace(/\n/g, "\\n"))
+				.join("\n");
 			const res = await fetch(`/api/db/${$page.params.database}/exec`, {
 				method: "POST",
 				body: JSON.stringify({ query: q }),
 			});
+
 			const json = await res.json<any>();
 			if (json) {
 				if (res.status == 500 && json.code == 400) {
@@ -51,26 +59,6 @@
 			running = false;
 		}
 	}
-	async function import_db() {
-		const file = document.createElement("input");
-		file.type = "file";
-		file.accept = ".sqlite3,.sqlite,.db,.sql";
-		file.onchange = async () => {
-			if (file.files?.length !== 1) {
-				return;
-			}
-			const db = file.files[0];
-			let sql: string;
-			if (db.name.endsWith(".sql")) {
-				sql = await db.text();
-			} else {
-				sql = await sqlite2sql(await db.arrayBuffer());
-			}
-			query = sql;
-			file.remove();
-		};
-		file.click();
-	}
 </script>
 
 <svelte:head>
@@ -81,67 +69,83 @@
 	/>
 </svelte:head>
 
-<div class="space-y-4">
-	<div class="flex justify-between items-center">
-		<h1 class="text-2xl font-bold">{$page.params.database}</h1>
-		<div class="flex gap-2">
-			<button class="btn btn-sm btn-outline" on:click={import_db}>
-				{$t("import")}
-			</button>
-			<a
-				class="btn btn-sm btn-outline"
-				href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
-				target="_blank"
-				rel="noreferrer"
-			>
-				{$t("download")}
-			</a>
-		</div>
-	</div>
-
-	<div class="tabs tabs-boxed">
-		<a class="tab tab-active">{$t("query")}</a>
-		<a class="tab">{$t("tables")}</a>
-	</div>
-
-	<div>
-		<textarea
-			class="textarea textarea-bordered w-full font-mono"
-			class:textarea-error={danger}
-			rows="10"
-			placeholder="SELECT * FROM users;"
-			bind:value={query}
-			disabled={running}
-		></textarea>
-		<div class="mt-2 flex justify-between items-center">
-			<div>
-				{#if error}
-					<div class="text-error">{error}</div>
-				{:else if duration}
-					<div class="text-sm">
-						{$t("n-ms", { values: { n: duration.toFixed(2) } })}
-					</div>
+<div class="flex w-full flex-col items-center justify-start gap-4 p-4">
+	<div class="card-border card w-full">
+		<div class="card-body">
+			<div class="join">
+				<textarea
+					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors"
+					class:!outline-error={danger}
+					placeholder={$t("execute-sql-query-in-database", {
+						values: { db: $page.params.database },
+					})}
+					bind:value={query}
+					on:keypress={handler}
+					disabled={running}
+				></textarea>
+				{#if query}
+					<button
+						class="btn-primary btn join-item h-auto min-w-[6rem]"
+						class:btn-error={danger}
+						on:click={run}
+						disabled={running}
+					>
+						Execute
+					</button>
 				{/if}
 			</div>
-			<button class="btn btn-primary" class:btn-error={danger} on:click={run} disabled={running}>
-				{#if running}
-					<span class="loading loading-spinner"></span>
-				{/if}
-				{$t("execute")}
-			</button>
+
+			{#if error}
+				<div class="text-error mt-2">{error}</div>
+			{:else if duration}
+				<div class="mt-2 text-sm">
+					{$t("n-ms", { values: { n: duration.toFixed(2) } })}
+				</div>
+			{/if}
 		</div>
 	</div>
 
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each data.db as table}
-			<a href="/db/{$page.params.database}/{table.name}">
-				<div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-					<div class="card-body">
-						<h2 class="card-title">{table.name}</h2>
-						<p>{$t("n-rows", { values: { n: table.count } })}</p>
+	{#each data.db as table}
+		<a class="w-full" href="/db/{$page.params.database}/{table.name}">
+			<div
+				class="card-border card hover:border-primary w-full transition-all hover:shadow-md"
+			>
+				<div class="card-body">
+					<h2 class="card-title">{table.name}</h2>
+
+					<div class="stats">
+						<div class="stat">
+							<div class="stat-title">{$t("rows")}</div>
+							<div class="stat-value">{table.count}</div>
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<div>
+						<div class="overflow-x-auto">
+							<table class="table-sm bg-base-200 table w-full">
+								<thead>
+									<tr>
+										<th>{$t("col-name")}</th>
+										<th>{$t("col-type")}</th>
+										<th>{$t("col-default")}</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each table.columns as column}
+										<tr class="hover" class:font-bold={column.pk}>
+											<td>{column.name}</td>
+											<td>{column.type}</td>
+											<td>{column.dflt_value}</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
-			</a>
-		{/each}
-	</div>
+			</div>
+		</a>
+	{/each}
 </div>

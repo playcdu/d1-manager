@@ -20,6 +20,7 @@
 	let order = "";
 	let dir: "ASC" | "DESC" = "ASC";
 	let select = "*";
+
 	let running = false;
 	let result: Record<string, unknown>[] | undefined;
 	let error:
@@ -30,14 +31,17 @@
 				};
 		  }
 		| undefined;
+
 	onMount(() => {
 		run();
 	});
+
 	async function run() {
 		if (running) {
 			return;
 		}
 		running = true;
+
 		try {
 			const params = new URLSearchParams();
 			params.set("select", `rowid AS _, ${select}`);
@@ -48,6 +52,7 @@
 				params.set("dir", dir);
 			}
 			const res = await fetch(`/api/db/${database}/${table}/data?${params.toString()}`);
+
 			const json = await res.json<typeof result | typeof error>();
 			if (json) {
 				if ("error" in json) {
@@ -74,6 +79,7 @@
 			running = false;
 		}
 	}
+
 	function change_sort(col: string) {
 		if (order === col) {
 			dir = dir === "ASC" ? "DESC" : "ASC";
@@ -83,19 +89,24 @@
 		}
 		run();
 	}
+
 	async function remove(rowid: unknown) {
 		if (running) {
 			return;
 		}
 		running = true;
+
 		console.log("remove", rowid);
+
 		try {
 			if (typeof rowid !== "number") {
 				throw new Error($t("plugin.table-browser.invalid-rowid"));
 			}
+
 			const res = await fetch(`/api/db/${database}/${table}/data/?rowid=${rowid}`, {
 				method: "DELETE",
 			});
+
 			const json = await res.json<typeof error>();
 			if (json) {
 				if ("error" in json) {
@@ -118,18 +129,23 @@
 			result = undefined;
 		} finally {
 			running = false;
+
 			const err = error;
 			await run();
 			error = err;
 		}
 	}
+
 	async function edit(rowid: unknown, col: string) {
 		if (running) {
 			return;
 		}
 		running = true;
+
 		const record = result?.find((r) => r._ === rowid);
+
 		console.log("edit", rowid, col, record);
+
 		try {
 			if (typeof rowid !== "number") {
 				throw new Error($t("plugin.table-browser.invalid-rowid"));
@@ -169,6 +185,7 @@
 			result = undefined;
 		} finally {
 			running = false;
+
 			const err = error;
 			await run();
 			error = err;
@@ -176,108 +193,138 @@
 	}
 </script>
 
-<div class="space-y-4">
-	<div class="flex justify-between items-center">
-		<div class="form-control">
-			<label class="label cursor-pointer gap-2">
-				<span class="label-text">{$t("read-only")}</span>
-				<input type="checkbox" class="toggle toggle-sm" bind:checked={locked} />
-			</label>
+<div class="pt-4 pb-2">
+	<label class="swap">
+		<input type="checkbox" bind:checked={locked} />
+		<div class="swap-on flex items-center gap-2">
+			<Icon icon="mdi:lock-outline" class="inline-block text-xl" />
+			{$t("plugin.table-browser.table-is-locked-click-to-unlock")}
 		</div>
-		{#if running}
-			<span class="loading loading-spinner"></span>
-		{/if}
-	</div>
+		<div class="swap-off flex items-center gap-2">
+			<Icon icon="mdi:lock-open-outline" class="inline-block text-xl" />
+			{$t("plugin.table-browser.table-is-unlocked-click-to-lock")}
+		</div>
+	</label>
+</div>
 
-	{#if result}
-		{#if result.length}
-			<div class="overflow-x-auto">
-				<table class="table table-zebra table-sm w-full">
-					<thead>
-						<tr>
-							{#each cols as col}
-								<th class="cursor-pointer" on:click={() => change_sort(col)}>
-									{col}
-									{#if order === col}
-										<Icon
-											icon={dir === "ASC" ? "mdi:arrow-up" : "mdi:arrow-down"}
-											class="inline-block"
-										/>
-									{/if}
-								</th>
+{#if result}
+	{#if result.length}
+		<div class="max-h-[80vh] overflow-auto transition-opacity" class:opacity-50={running}>
+			<table class="table-sm table min-w-full">
+				<thead>
+					<tr class="bg-base-200 sticky top-0 z-10 shadow">
+						{#each cols as col}
+							<th
+								class="!relative cursor-pointer normal-case"
+								on:click={() => change_sort(col)}
+								title={$t("plugin.table-browser.click-to-sort-by", {
+									values: { col },
+								})}
+							>
+								{col}
+								{#if order === col}
+									<span class="text-sm font-normal opacity-50">{dir}</span>
+								{/if}
+							</th>
+						{/each}
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each result as row}
+						<tr class="group hover">
+							{#each Object.keys(row) as key}
+								{#if key !== "_"}
+									<td>
+										{#if typeof row[key] === "number"}
+											<input
+												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
+												type="number"
+												bind:value={row[key]}
+												on:blur={() => edit(row._, key)}
+												disabled={locked || running}
+												title={locked
+													? $t("plugin.table-browser.table-is-locked")
+													: undefined}
+											/>
+										{:else}
+											<input
+												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
+												bind:value={row[key]}
+												on:change={() => edit(row._, key)}
+												disabled={locked || running}
+												title={locked
+													? $t("plugin.table-browser.table-is-locked")
+													: undefined}
+											/>
+										{/if}
+									</td>
+								{/if}
 							{/each}
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each result as row}
-							<tr>
-								{#each Object.keys(row) as key}
-									{#if key !== "_"}
-										<td>
-											{#if typeof row[key] === "number"}
-												<input
-													class="input input-ghost input-sm w-full"
-													type="number"
-													bind:value={row[key]}
-													on:blur={() => edit(row._, key)}
-													disabled={locked || running}
-												/>
-											{:else}
-												<input
-													class="input input-ghost input-sm w-full"
-													bind:value={row[key]}
-													on:change={() => edit(row._, key)}
-													disabled={locked || running}
-												/>
-											{/if}
-										</td>
-									{/if}
-								{/each}
-								<td>
+							<td>
+								<div
+									class="pointer-events-none flex items-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+								>
 									<button
-										class="btn btn-ghost btn-xs"
+										class="btn-outline btn-error btn-xs btn"
 										on:click={() => remove(row._)}
 										disabled={locked || running}
 									>
-										<Icon icon="mdi:delete-outline" class="text-lg" />
+										<Icon class="text-lg" icon="mdi:delete-outline" />
 									</button>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-			<div class="join grid grid-cols-2">
-				<button
-					class="join-item btn btn-outline"
-					disabled={offset === 0 || running}
-					on:click={() => {
-						offset -= limit;
-						run();
-					}}
-				>
-					{$t("plugin.table-browser.prev")}
-				</button>
-				<button
-					class="join-item btn btn-outline"
-					disabled={result.length < limit || running}
-					on:click={() => {
-						offset += limit;
-						run();
-					}}
-				>
-					{$t("plugin.table-browser.next")}
-				</button>
-			</div>
-		{:else}
-			<p>{$t("plugin.table-browser.no-results")}</p>
-		{/if}
+								</div>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{:else}
+		<p class="mt-4">
+			{$t("plugin.table-browser.no-results")}
+		</p>
 	{/if}
 
-	{#if error}
-		<div class="alert alert-error">
-			<div>{error.error.cause || error.error.message}</div>
-		</div>
-	{/if}
-</div>
+	<div class="flex items-center justify-between">
+		{#if offset > 0}
+			<button
+				class="btn-ghost btn-sm btn"
+				on:click={() => {
+					offset -= limit;
+					run();
+				}}
+				disabled={running}
+			>
+				{$t("plugin.table-browser.prev")}
+			</button>
+		{/if}
+
+		<p class="flex-grow-0 px-4">
+			{$t("plugin.table-browser.showing", {
+				values: {
+					from: result.length ? offset + 1 : offset,
+					to: offset + result.length,
+				},
+			})}
+		</p>
+
+		{#if result.length === limit}
+			<button
+				class="btn-ghost btn-sm btn"
+				on:click={() => {
+					offset += limit;
+					run();
+				}}
+				disabled={running}
+			>
+				{$t("plugin.table-browser.next")}
+			</button>
+		{/if}
+	</div>
+{/if}
+
+{#if error}
+	<div class="alert alert-error shadow-lg">
+		<div>{error.error.cause || error.error.message}</div>
+	</div>
+{/if}

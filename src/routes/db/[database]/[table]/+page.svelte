@@ -2,7 +2,7 @@
 	import { page } from "$app/stores";
 	import { t } from "svelte-i18n";
 	import type { PageData } from "./$types";
-	import { onMount } from "svelte";
+	import SidePanel from "./SidePanel.svelte";
 
 	export let data: PageData;
 	const meta = data.db.find((table) => table.name === $page.params.table);
@@ -18,19 +18,21 @@
 		["csv"]: () => import("$lib/plugin/CSV.svelte"),
 	};
 
-	let plugin: keyof typeof plugins = "table-browser";
+	let plugin: keyof typeof plugins | undefined;
 	let PluginComponent: ConstructorOfATypedSvelteComponent | undefined;
-
-	function loadPlugin(p: keyof typeof plugins) {
-		plugin = p;
-		plugins[plugin]().then((m) => {
-			PluginComponent = m.default;
-		});
+	$: {
+		if (plugin) {
+			plugins[plugin]().then((m) => {
+				PluginComponent = m.default;
+			});
+		}
 	}
 
-	onMount(() => {
-		loadPlugin("table-browser");
-	});
+	function preload_plugins() {
+		Object.values(plugins).forEach((importer) => {
+			importer();
+		});
+	}
 </script>
 
 <svelte:head>
@@ -41,42 +43,51 @@
 	/>
 </svelte:head>
 
-<div class="space-y-4">
-	<h1 class="text-2xl font-bold">{meta.name}</h1>
-
-	<div class="overflow-x-auto">
-		<table class="table table-zebra table-sm">
-			<thead>
-				<tr>
-					<th>{$t("col-name")}</th>
-					<th>{$t("col-type")}</th>
-					<th>{$t("col-default")}</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each meta.columns as column}
-					<tr class:font-bold={column.pk}>
-						<td>{column.name}</td>
-						<td>{column.type}</td>
-						<td>{column.dflt_value}</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
-
-	<div class="tabs tabs-boxed">
-		{#each Object.keys(plugins) as name}
-			<a
-				class="tab"
-				class:tab-active={plugin === name}
-				on:click={() => loadPlugin(name as keyof typeof plugins)}>{$t(`plugin.${name}.name`)}</a
-			>
-		{/each}
-	</div>
-
-	<div class="card bg-base-100 shadow-xl">
+<div class="flex w-full flex-col items-center justify-start gap-4">
+	<div class="card w-full">
 		<div class="card-body">
+			<div class="mb-4 flex justify-between">
+				<h2 class="card-title">{meta.name}</h2>
+				<div class="flex gap-2">
+					<!-- <button class="btn-outline btn-error btn-sm btn">Drop</button> -->
+				</div>
+			</div>
+
+			<div>
+				<div class="overflow-x-auto">
+					<table class="table-sm bg-base-200 table w-full">
+						<thead>
+							<tr>
+								<th>{$t("col-name")}</th>
+								<th>{$t("col-type")}</th>
+								<th>{$t("col-default")}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each meta.columns as column}
+								<tr class="hover" class:font-bold={column.pk}>
+									<td>{column.name}</td>
+									<td>{column.type}</td>
+									<td>{column.dflt_value}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="divider"></div>
+
+			<select
+				class="select-border select max-w-xs"
+				bind:value={plugin}
+				on:click={preload_plugins}
+			>
+				{#each Object.keys(plugins) as name}
+					<option value={name}>{$t(`plugin.${name}.name`)}</option>
+				{/each}
+			</select>
+
 			{#if PluginComponent}
 				<svelte:component
 					this={PluginComponent}
@@ -88,3 +99,5 @@
 		</div>
 	</div>
 </div>
+
+<SidePanel {data} />

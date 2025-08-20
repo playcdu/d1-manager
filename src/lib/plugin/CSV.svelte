@@ -11,12 +11,15 @@
 	const cols = data.db
 		.find(({ name }) => name === table)
 		?.columns.sort(({ cid: a }, { cid: b }) => a - b);
+
 	if (!cols) {
 		throw new Error(`Table not found: ${table} in ${database}`);
 	}
+
 	const types: Record<string, Type> = Object.fromEntries(
 		cols.map(({ name, type }) => [name, affinity(type)]),
 	);
+
 	let running = false;
 	let result:
 		| {
@@ -32,6 +35,7 @@
 		  }
 		| undefined;
 	let error: string | undefined;
+
 	let files: FileList | undefined;
 	let keys: string[] | undefined;
 	let casted: any[][] | undefined;
@@ -40,23 +44,27 @@
 			return;
 		}
 		running = true;
+
 		try {
 			const { parse } = await import("csv-parse/browser/esm/sync");
 			const file = files?.[0];
 			if (!file) {
 				return;
 			}
+
 			const text = await file.text();
 			const rows: Record<string, string>[] = parse(text, {
 				columns: true,
 				skip_empty_lines: true,
 			});
+
 			keys = Object.keys(rows[0]);
 			for (const key of keys) {
 				if (!types[key]) {
 					throw new Error($t("plugin.csv.invalid-column-name-key", { values: { key } }));
 				}
 			}
+
 			casted = rows.map((row) => {
 				return (keys || []).map((key) => {
 					const value = row[key];
@@ -64,6 +72,7 @@
 					return cast(value, type);
 				});
 			});
+
 			error = undefined;
 		} catch (err) {
 			console.error(err);
@@ -74,13 +83,16 @@
 			running = false;
 		}
 	}
+
 	async function import_csv() {
 		if (running || !casted) {
 			return;
 		}
 		running = true;
+
 		try {
 			const bodies = split(casted, 90_000);
+
 			function split(arr: any[][], size: number): string[] {
 				const bodies: string[] = [""];
 				for (let i = 0; i < arr.length; i++) {
@@ -95,9 +107,11 @@
 				}
 				return bodies;
 			}
+
 			const queries = bodies.map(
 				(body) => `INSERT INTO ${table} (${keys?.join(", ")}) VALUES ${body}`,
 			);
+
 			console.log(queries);
 			let r: typeof result = undefined;
 			for (const query of queries) {
@@ -105,6 +119,7 @@
 					method: "POST",
 					body: JSON.stringify({ query }),
 				});
+
 				const json = await res.json<any>();
 				if (json) {
 					if ("error" in json) {
@@ -131,20 +146,25 @@
 			running = false;
 		}
 	}
+
 	async function export_csv() {
 		if (running) {
 			return;
 		}
 		running = true;
+
 		try {
 			const module = import("csv-stringify/browser/esm/sync");
 			const res = await fetch(`/api/db/${database}/${table}/data`);
 			const json = await res.json<any>();
+
 			const { stringify } = await module;
+
 			const csv = stringify(json, {
 				header: true,
 				columns: keys,
 			});
+
 			const a = document.createElement("a");
 			a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
 			a.setAttribute("download", `${table}.csv`);
@@ -157,53 +177,58 @@
 	}
 </script>
 
-<div class="space-y-4">
-	<div class="form-control">
+<div class="w-full rounded-lg border p-4">
+	<p class="card-title">{$t("plugin.csv.import-csv")}</p>
+
+	<div class="divider"></div>
+
+	<div class="w-full">
 		<label class="label" for="csv">
-			<span class="label-text">{$t("plugin.csv.import-csv")}</span>
+			<span class="label-text">{$t("plugin.csv.select-a-csv-file")}</span>
 		</label>
 		<input
 			id="csv"
 			type="file"
-			class="file-input file-input-bordered"
+			class="file-input-border file-input w-full"
 			bind:files
 			accept=".csv"
 			on:change={read}
 			disabled={running}
 		/>
+		<label class="label" for="csv">
+			<span class="label-text-alt text-error">{error || ""}</span>
+			<span class="label-text-alt">.csv</span>
+		</label>
 	</div>
 
 	{#if keys && casted?.length}
-		<div class="overflow-x-auto">
-			<table class="table table-zebra table-sm w-full">
+		<div class="my-2 max-h-[70vh] overflow-auto">
+			<table class="table-sm table w-full">
 				<thead>
-					<tr>
+					<tr class="bg-base-200 sticky top-0 z-10 shadow">
 						{#each keys as key}
-							<th>{key}</th>
+							<th class="!relative normal-case">{key}</th>
 						{/each}
 					</tr>
 				</thead>
 				<tbody>
 					{#each casted as row}
-						<tr>
+						<tr class="hover">
 							{#each row as value}
-								<td>{value}</td>
+								<td class="text-base-content">{value}</td>
 							{/each}
 						</tr>
 					{/each}
 				</tbody>
 			</table>
 		</div>
-		<button class="btn btn-primary w-full" on:click={import_csv} disabled={running}>
-			{#if running}
-				<span class="loading loading-spinner"></span>
-			{/if}
+
+		<button class="btn-primary btn w-full" on:click={import_csv} disabled={running}>
 			{$t("plugin.csv.import")}
 		</button>
 	{/if}
-
 	{#if result}
-		<p class="text-sm">
+		<p class="mt-2 text-sm opacity-70">
 			{$t("plugin.csv.n-ms-m-changes", {
 				values: {
 					n: result.meta.duration.toFixed(2),
@@ -212,19 +237,14 @@
 			})}
 		</p>
 	{/if}
+</div>
 
-	<div class="divider">{$t("or")}</div>
+<div class="w-full rounded-lg border p-4">
+	<p class="card-title">{$t("plugin.csv.export-csv")}</p>
 
-	<button class="btn btn-outline w-full" on:click={export_csv} disabled={running}>
-		{#if running}
-			<span class="loading loading-spinner"></span>
-		{/if}
-		{$t("plugin.csv.export-csv")}
+	<div class="divider"></div>
+
+	<button class="btn-primary btn w-full" on:click={export_csv} disabled={running}>
+		{$t("plugin.csv.export")}
 	</button>
-
-	{#if error}
-		<div class="alert alert-error">
-			<div>{error}</div>
-		</div>
-	{/if}
 </div>
