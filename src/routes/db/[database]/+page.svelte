@@ -104,25 +104,27 @@
 	/>
 </svelte:head>
 
-<div class="flex w-full flex-col items-center justify-start gap-4">
-	<div class="stats shadow">
-		<div class="stat">
-			<div class="stat-title">{$t('tables')}</div>
-			<div class="stat-value">{data.db.length}</div>
+<div class="flex flex-col gap-4">
+	<div class="flex gap-4">
+		<div class="rounded-lg bg-white p-4 shadow">
+			<div class="text-sm font-medium text-gray-500">{$t('tables')}</div>
+			<div class="text-2xl font-bold">{data.db.length}</div>
 		</div>
-
-		<div class="stat">
-			<div class="stat-title">{$t('total-rows')}</div>
-			<div class="stat-value">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
+		<div class="rounded-lg bg-white p-4 shadow">
+			<div class="text-sm font-medium text-gray-500">{$t('total-rows')}</div>
+			<div class="text-2xl font-bold">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
 		</div>
 	</div>
 
 	<div class="flex gap-2">
-		<button class="btn-outline btn-sm btn" on:click={import_db}>
+		<button
+			class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+			on:click={import_db}
+		>
 			{$t('import')}
 		</button>
 		<a
-			class="btn-outline btn-sm btn"
+			class="rounded-md bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
 			href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
 			target="_blank"
 			rel="noreferrer"
@@ -131,36 +133,34 @@
 		</a>
 	</div>
 
-	<div class="card-border card w-full">
-		<div class="card-body">
-			<div class="join">
-				<textarea
-					class="textarea-border textarea focus:textarea-primary join-item h-10 w-full flex-1 resize-y !rounded-l-lg font-mono transition-colors"
-					class:!outline-error={danger}
-					placeholder="Execute SQL query in {$page.params.database}"
-					bind:value={query}
-					on:keypress={handler}
+	<div class="rounded-lg bg-white p-4 shadow">
+		<div class="flex">
+			<textarea
+				class="w-full flex-1 rounded-l-md border border-gray-300 p-2 font-mono focus:border-blue-500 focus:ring-blue-500"
+				class:border-red-500={danger}
+				placeholder="Execute SQL query in {$page.params.database}"
+				bind:value={query}
+				on:keypress={handler}
+				disabled={running}
+			></textarea>
+			{#if query}
+				<button
+					class="rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+					class:bg-red-500={danger}
+					on:click={run}
 					disabled={running}
-				></textarea>
-				{#if query}
-					<button
-						class="btn-primary btn join-item h-auto min-w-[6rem]"
-						class:btn-error={danger}
-						on:click={run}
-						disabled={running}
-					>
-						Execute
-					</button>
-				{/if}
-			</div>
-
-			{#if error}
-				<div class="text-error mt-2">{error}</div>
-			{:else if duration}
-				<div class="mt-2 text-sm">
-					{$t('n-ms', { values: { n: duration.toFixed(2) } })}
-				</div>
+				>
+					Execute
+				</button>
 			{/if}
 		</div>
+
+		{#if error}
+			<div class="mt-2 text-red-500">{error}</div>
+		{:else if duration}
+			<div class="mt-2 text-sm text-gray-500">
+				{$t('n-ms', { values: { n: duration.toFixed(2) } })}
+			</div>
+		{/if}
 	</div>
 </div>

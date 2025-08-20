@@ -40,30 +40,34 @@
 	/>
 </svelte:head>
 
-<div class="flex w-full flex-col items-center justify-start gap-4">
-	<div class="card w-full">
-		<div class="card-body">
-			<div role="tablist" class="tabs-lifted tabs">
-				{#each Object.keys(plugins) as name}
-					<button
-						role="tab"
-						class="tab"
-						class:tab-active={plugin === name}
-						on:click={() => (plugin = name)}
-					>
-						{$t(`plugin.${name}.name`)}
-					</button>
-				{/each}
-			</div>
+<div class="rounded-lg bg-white p-4 shadow">
+	<div class="border-b border-gray-200">
+		<nav class="-mb-px flex gap-6">
+			{#each Object.keys(plugins) as name}
+				<button
+					class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+					class:border-blue-500={plugin === name}
+					class:text-blue-600={plugin === name}
+					class:border-transparent={plugin !== name}
+					class:text-gray-500={plugin !== name}
+					class:hover:border-gray-300={plugin !== name}
+					class:hover:text-gray-700={plugin !== name}
+					on:click={() => (plugin = name)}
+				>
+					{$t(`plugin.${name}.name`)}
+				</button>
+			{/each}
+		</nav>
+	</div>
 
-			{#if PluginComponent}
-				<svelte:component
-					this={PluginComponent}
-					{data}
-					database={$page.params.database}
-					table={$page.params.table}
-				/>
-			{/if}
-		</div>
+	<div class="mt-4">
+		{#if PluginComponent}
+			<svelte:component
+				this={PluginComponent}
+				{data}
+				database={$page.params.database}
+				table={$page.params.table}
+			/>
+		{/if}
 	</div>
 </div>
