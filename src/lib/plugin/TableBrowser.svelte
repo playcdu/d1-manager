@@ -114,35 +114,36 @@
 						q: query
 					})
 				});
-				if (res.ok) {
-					const json = await res.json();
-					const sql_to_run = json.sql;
 
-					// now execute the query
-					const query_res = await fetch(`/api/db/${database}/all`, {
-						method: 'POST',
-						body: JSON.stringify({ query: sql_to_run })
-					});
-					const query_json = await query_res.json();
-					if (query_res.ok) {
-						if ('results' in query_json) {
-							result = query_json.results;
-						} else {
-							result = [];
-						}
-						last_run_sql = sql_to_run;
-						is_custom_sql_result = true;
-					} else {
-						if ('message' in query_json) {
-							throw new Error(query_json.message);
-						}
-						throw new Error('SQL query failed');
-					}
-				} else {
+				if (!res.ok) {
 					throw new Error(await res.text());
 				}
+
+				const json = await res.json();
+				const sql_to_run = json.sql;
+
+				// now execute the query
+				const query_res = await fetch(`/api/db/${database}/all`, {
+					method: 'POST',
+					body: JSON.stringify({ query: sql_to_run })
+				});
+				const query_json = await query_res.json();
+				if (query_res.ok) {
+					if ('results' in query_json) {
+						result = query_json.results;
+					} else {
+						result = [];
+					}
+					last_run_sql = sql_to_run;
+					is_custom_sql_result = true;
+				} else {
+					if ('message' in query_json) {
+						throw new Error(query_json.message);
+					}
+					throw new Error('SQL query failed');
+				}
 			} else {
-				where = '';
+				// For raw SQL, execute the query directly
 				const res = await fetch(`/api/db/${database}/all`, {
 					method: 'POST',
 					body: JSON.stringify({ query })
