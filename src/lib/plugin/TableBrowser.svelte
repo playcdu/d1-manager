@@ -106,22 +106,23 @@
 		error = undefined;
 
 		try {
-			if (query_mode === "semantic") {
+			if (query_mode === 'semantic') {
 				const res = await fetch(`/api/db/${database}/assistant`, {
-					method: "POST",
+					method: 'POST',
 					body: JSON.stringify({
-						table,
-						query
+						t: table,
+						q: query
 					})
 				});
 				if (res.ok) {
-					where = await res.text();
+					const json = await res.json();
+					where = json.sql.replace(/^`|"$/g, '').replace(/`/g, '`');
 					await _fetchTableData();
 				} else {
 					throw new Error(await res.text());
 				}
 			} else {
-				where = "";
+				where = '';
 				const res = await fetch(`/api/db/${database}/all`, {
 					method: "POST",
 					body: JSON.stringify({ query })
@@ -288,17 +289,19 @@
 			class="input-bordered input w-full"
 			bind:value={query}
 		/>
-		<button type="submit" class="btn btn-primary">Query</button>
 		<div class="tabs-boxed tabs">
 			<a
 				class="tab"
-				class:tab-active={query_mode === "semantic"}
-				on:click={() => (query_mode = "semantic")}>Semantic</a
+				class:tab-active={query_mode === 'semantic'}
+				on:click={() => (query_mode = 'semantic')}>Semantic</a
 			>
-			<a class="tab" class:tab-active={query_mode === "sql"} on:click={() => (query_mode = "sql")}
-				>SQL</a
+			<a
+				class="tab"
+				class:tab-active={query_mode === 'sql'}
+				on:click={() => (query_mode = 'sql')}>SQL</a
 			>
 		</div>
+		<button type="submit" class="btn btn-primary">Query</button>
 	</div>
 </form>
 
