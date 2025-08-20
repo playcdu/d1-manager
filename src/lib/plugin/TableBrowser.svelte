@@ -40,7 +40,15 @@
 
 	onMount(() => {
 		run();
+		const saved_locked_state = localStorage.getItem('d1-manager:locked-state');
+		if (saved_locked_state) {
+			locked = JSON.parse(saved_locked_state);
+		}
 	});
+
+	$: {
+		localStorage.setItem('d1-manager:locked-state', JSON.stringify(locked));
+	}
 
 	async function _fetchTableData() {
 		is_custom_sql_result = false;
@@ -301,17 +309,12 @@
 </script>
 
 <div class="pt-4 pb-2">
-	<label class="swap">
-		<input type="checkbox" bind:checked={locked} />
-		<div class="swap-on flex items-center gap-2">
-			<Icon icon="mdi:lock-outline" class="inline-block text-xl" />
-			{$t("plugin.table-browser.table-is-locked-click-to-unlock")}
-		</div>
-		<div class="swap-off flex items-center gap-2">
-			<Icon icon="mdi:lock-open-outline" class="inline-block text-xl" />
-			{$t("plugin.table-browser.table-is-unlocked-click-to-lock")}
-		</div>
-	</label>
+	<div class="form-control w-52">
+		<label class="label cursor-pointer">
+			<span class="label-text">{$t(locked ? 'plugin.table-browser.table-is-locked' : 'plugin.table-browser.table-is-unlocked')}</span>
+			<input type="checkbox" class="toggle toggle-primary" bind:checked={locked} />
+		</label>
+	</div>
 </div>
 
 <div class="tabs-boxed tabs mb-2 w-max">
@@ -350,7 +353,7 @@
 {#if result}
 	{#if result.length}
 		<div class="max-h-[80vh] overflow-auto transition-opacity" class:opacity-50={running}>
-			<table class="table-sm table min-w-full">
+			<table class="table-zebra table min-w-full">
 				<thead>
 					<tr class="bg-base-200 sticky top-0 z-10 shadow">
 						{#each Object.keys(result[0] || {}) as col}
@@ -378,7 +381,7 @@
 						<tr class="group hover">
 							{#each Object.keys(row) as key}
 								{#if key !== "_"}
-									<td>
+									<td class="border">
 										{#if typeof row[key] === "number"}
 											<input
 												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
@@ -400,7 +403,7 @@
 									</td>
 								{/if}
 							{/each}
-							<td>
+							<td class="border">
 								<div
 									class="pointer-events-none flex items-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
 								>
