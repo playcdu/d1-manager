@@ -56,7 +56,7 @@
 		</div>
 		<div class="flex-none">
 			<select
-				class="select-ghost select select-sm w-full max-w-xs"
+				class="select-bordered select select-sm w-full max-w-xs"
 				bind:value={database}
 				on:click={preload}
 			>
