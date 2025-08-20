@@ -1,31 +1,50 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	import { t } from "svelte-i18n";
-	import type { PluginData } from "./type";
-	import Icon from "@iconify/svelte";
+	import Icon from '@iconify/svelte';
+	import {
+		createSvelteTable,
+		flexRender,
+		getCoreRowModel,
+		getSortedRowModel,
+		typeColumnDef,
+		type RowData
+	} from '@tanstack/svelte-table';
+	import { onMount, SvelteComponent } from 'svelte';
+	import { t } from 'svelte-i18n';
+	import type { PluginData } from './type';
 
 	export let database: string;
 	export let table: string;
 	export let data: PluginData;
 
-	const cols =
-		data.db
-			.find(({ name }) => name === table)
-			?.columns.sort(({ cid: a }, { cid: b }) => a - b)
-			.map(({ name }) => name) || [];
+	type Person = Record<string, unknown>;
+	type Doc = {
+		[key: string]: unknown;
+	};
+
+	declare module '@tanstack/svelte-table' {
+		interface ColumnMeta<TData extends RowData, TValue> {
+			is_number?: boolean;
+		}
+	}
+
+	class TableCell extends SvelteComponent<{
+		value: unknown;
+		row: RowData;
+		column: ColumnMeta;
+	}> {}
 
 	let locked = true;
 	let offset = 0;
 	let limit = 20;
-	let order = "";
-	let dir: "ASC" | "DESC" = "ASC";
-	let select = "*";
-	let where = "";
-	let last_run_sql = "";
+	let order = '';
+	let dir: 'ASC' | 'DESC' = 'ASC';
+	let select = '*';
+	let where = '';
+	let last_run_sql = '';
 	let is_custom_sql_result = false;
 
-	let query_mode: "semantic" | "sql" = "semantic";
-	let query = "";
+	let query_mode: 'semantic' | 'sql' = 'semantic';
+	let query = '';
 
 	let running = false;
 	let result: Record<string, unknown>[] | undefined;
@@ -54,24 +73,24 @@
 		is_custom_sql_result = false;
 		try {
 			const params = new URLSearchParams();
-			params.set("select", `rowid AS _, ${select}`);
-			params.set("offset", offset.toString());
-			params.set("limit", limit.toString());
+			params.set('select', `rowid AS _, ${select}`);
+			params.set('offset', offset.toString());
+			params.set('limit', limit.toString());
 			if (order) {
-				params.set("order", order);
-				params.set("dir", dir);
+				params.set('order', order);
+				params.set('dir', dir);
 			}
 			if (where) {
-				params.set("where", where);
+				params.set('where', where);
 			}
-			last_run_sql = `SELECT ${select} FROM \`${table}\`${where ? ` WHERE ${where}` : ""}${
-				order ? ` ORDER BY ${order} ${dir}` : ""
+			last_run_sql = `SELECT ${select} FROM \`${table}\`${where ? ` WHERE ${where}` : ''}${
+				order ? ` ORDER BY ${order} ${dir}` : ''
 			} LIMIT ${limit} OFFSET ${offset}`;
 			const res = await fetch(`/api/db/${database}/${table}/data?${params.toString()}`);
 
 			const json = await res.json<typeof result | typeof error>();
 			if (json) {
-				if ("error" in json) {
+				if ('error' in json) {
 					error = json;
 					result = undefined;
 				} else {
@@ -79,7 +98,7 @@
 					error = undefined;
 				}
 			} else {
-				throw new Error($t("plugin.table-browser.no-result"));
+				throw new Error($t('plugin.table-browser.no-result'));
 			}
 		} catch (err) {
 			error = {
@@ -87,8 +106,8 @@
 					message:
 						err instanceof Error
 							? err.message
-							: $t("plugin.table-browser.unknown-error"),
-				},
+							: $t('plugin.table-browser.unknown-error')
+				}
 			};
 			result = undefined;
 		}
@@ -114,7 +133,7 @@
 		if (!query.trim()) {
 			running = true;
 			try {
-				where = "";
+				where = '';
 				await _fetchTableData();
 			} finally {
 				running = false;
@@ -194,43 +213,32 @@
 		}
 	}
 
-	function change_sort(col: string) {
-		if (is_custom_sql_result) return;
-		if (order === col) {
-			dir = dir === "ASC" ? "DESC" : "ASC";
-		} else {
-			order = col;
-			dir = "ASC";
-		}
-		run();
-	}
-
 	async function remove(rowid: unknown) {
 		if (running) {
 			return;
 		}
 		running = true;
 
-		console.log("remove", rowid);
+		console.log('remove', rowid);
 
 		try {
-			if (typeof rowid !== "number") {
-				throw new Error($t("plugin.table-browser.invalid-rowid"));
+			if (typeof rowid !== 'number') {
+				throw new Error($t('plugin.table-browser.invalid-rowid'));
 			}
 
 			const res = await fetch(`/api/db/${database}/${table}/data/?rowid=${rowid}`, {
-				method: "DELETE",
+				method: 'DELETE'
 			});
 
 			const json = await res.json<typeof error>();
 			if (json) {
-				if ("error" in json) {
+				if ('error' in json) {
 					error = json;
 				} else {
 					error = undefined;
 				}
 			} else {
-				throw new Error($t("plugin.table-browser.no-result"));
+				throw new Error($t('plugin.table-browser.no-result'));
 			}
 		} catch (err) {
 			error = {
@@ -238,8 +246,8 @@
 					message:
 						err instanceof Error
 							? err.message
-							: $t("plugin.table-browser.unknown-error"),
-				},
+							: $t('plugin.table-browser.unknown-error')
+				}
 			};
 			result = undefined;
 		} finally {
@@ -251,7 +259,7 @@
 		}
 	}
 
-	async function edit(rowid: unknown, col: string) {
+	async function edit(rowid: unknown) {
 		if (running) {
 			return;
 		}
@@ -259,34 +267,32 @@
 
 		const record = result?.find((r) => r._ === rowid);
 
-		console.log("edit", rowid, col, record);
-
 		try {
-			if (typeof rowid !== "number") {
-				throw new Error($t("plugin.table-browser.invalid-rowid"));
+			if (typeof rowid !== 'number') {
+				throw new Error($t('plugin.table-browser.invalid-rowid'));
 			}
 			if (!record) {
-				throw new Error($t("plugin.table-browser.no-record"));
+				throw new Error($t('plugin.table-browser.no-record'));
 			}
 			const res = await fetch(`/api/db/${database}/${table}/data/?rowid=${rowid}`, {
-				method: "PUT",
+				method: 'PUT',
 				headers: {
-					"Content-Type": "application/json",
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
 					...record,
-					_: undefined,
-				}),
+					_: undefined
+				})
 			});
 			const json = await res.json<typeof error>();
 			if (json) {
-				if ("error" in json) {
+				if ('error' in json) {
 					error = json;
 				} else {
 					error = undefined;
 				}
 			} else {
-				throw new Error($t("plugin.table-browser.no-result"));
+				throw new Error($t('plugin.table-browser.no-result'));
 			}
 		} catch (err) {
 			error = {
@@ -294,8 +300,8 @@
 					message:
 						err instanceof Error
 							? err.message
-							: $t("plugin.table-browser.unknown-error"),
-				},
+							: $t('plugin.table-browser.unknown-error')
+				}
 			};
 			result = undefined;
 		} finally {
@@ -306,6 +312,79 @@
 			error = err;
 		}
 	}
+
+	$: columns =
+		result && result.length > 0
+			? Object.keys(result[0]).map((key) => {
+					if (key === '_') {
+						return;
+					}
+
+					const is_number = typeof result?.[0]?.[key] === 'number';
+
+					return tableInstance.createDataColumn(key, {
+						header: () => key,
+						meta: {
+							is_number
+						},
+						cell: (info) => {
+							const initialValue = info.getValue();
+							let value = initialValue;
+							const row = info.row.original as Doc;
+
+							const onchange = (e) => {
+								value = e.target.value;
+								(result as Doc[])[info.row.index][key] = is_number ? Number(value) : value;
+								edit(row._);
+							};
+
+							return `<input class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent" type="${
+								is_number ? 'number' : 'text'
+							}" value="${value}" on:change="${onchange}" disabled="${locked || running}" />`;
+						}
+					});
+			  })
+			: [];
+
+	$: tableData = result || [];
+
+	const tableInstance = createSvelteTable({
+		get data() {
+			return tableData;
+		},
+		get columns() {
+			return [
+				...(columns || []).filter((c) => c),
+				tableInstance.createDisplayColumn({
+					id: 'actions',
+					cell: (info) => {
+						const row = info.row.original as Doc;
+						return `<button class="btn-outline btn-error btn-xs btn" on:click="${() =>
+							remove(row._)}" disabled="${locked || running}">
+							<Icon class="text-lg" icon="mdi:delete-outline' />
+						</button>`;
+					}
+				})
+			];
+		},
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		onSortingChange: (updater) => {
+			const new_sorting_state =
+				typeof updater === 'function' ? updater(tableInstance.getState().sorting) : updater;
+
+			if (new_sorting_state.length === 0) {
+				order = '';
+				dir = 'ASC';
+			} else {
+				const [new_sort] = new_sorting_state;
+				order = new_sort.id;
+				dir = new_sort.desc ? 'DESC' : 'ASC';
+			}
+
+			run();
+		}
+	});
 </script>
 
 <div class="pt-4 pb-2">
@@ -358,70 +437,41 @@
 
 {#if result}
 	{#if result.length}
-		<div class="max-h-[80vh] overflow-auto transition-opacity" class:opacity-50={running}>
-			<table class="table-zebra table min-w-full">
-				<thead>
-					<tr class="bg-base-200 sticky top-0 z-10 shadow">
-						{#each Object.keys(result[0] || {}) as col}
-							<th
-								class="!relative normal-case"
-								class:cursor-pointer={!is_custom_sql_result}
-								on:click={() => change_sort(col)}
-								title={!is_custom_sql_result
-									? $t("plugin.table-browser.click-to-sort-by", {
-											values: { col }
-									  })
-									: undefined}
-							>
-								{col}
-								{#if order === col && !is_custom_sql_result}
-									<span class="text-sm font-normal opacity-50">{dir}</span>
-								{/if}
-							</th>
-						{/each}
-						<th></th>
-					</tr>
+		<div
+			class="max-h-[80vh] overflow-auto rounded-lg border border-white/20 bg-white/60 shadow backdrop-blur-lg transition-opacity"
+			class:opacity-50={running}
+		>
+			<table class="table min-w-full">
+				<thead class="bg-white/60 backdrop-blur-lg">
+					{#each tableInstance.getHeaderGroups() as headerGroup}
+						<tr>
+							{#each headerGroup.headers as header}
+								<th class="!relative normal-case">
+									<button
+										class="flex w-full items-center justify-between"
+										on:click={header.column.getToggleSortingHandler()}
+									>
+										{#if !header.isPlaceholder}
+											{flexRender(header.column.columnDef.header, header.getContext())}
+										{/if}
+										{{
+											asc: ' 🔼',
+											desc: ' 🔽'
+										}[header.column.getIsSorted() as string] ?? ''}
+									</button>
+								</th>
+							{/each}
+						</tr>
+					{/each}
 				</thead>
 				<tbody>
-					{#each result as row}
+					{#each tableInstance.getRowModel().rows as row}
 						<tr class="group hover">
-							{#each Object.keys(row) as key}
-								{#if key !== "_"}
-									<td class="border">
-										{#if typeof row[key] === "number"}
-											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
-												type="number"
-												bind:value={row[key]}
-												on:blur={() => edit(row._, key)}
-												disabled={locked || running}
-												title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
-											/>
-										{:else}
-											<input
-												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
-												bind:value={row[key]}
-												on:change={() => edit(row._, key)}
-												disabled={locked || running}
-												title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
-											/>
-										{/if}
-									</td>
-								{/if}
+							{#each row.getVisibleCells() as cell}
+								<td class="border">
+									{@html flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</td>
 							{/each}
-							<td class="border">
-								<div
-									class="pointer-events-none flex items-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
-								>
-									<button
-										class="btn-outline btn-error btn-xs btn"
-										on:click={() => remove(row._)}
-										disabled={locked || running}
-									>
-										<Icon class="text-lg" icon="mdi:delete-outline" />
-									</button>
-								</div>
-							</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -429,8 +479,8 @@
 		</div>
 	{:else}
 		<p class="mt-4">
-			{$t("plugin.table-browser.no-results")}
-		</p>
+			{$t('plugin.table-browser.no-results')}
+		p>
 	{/if}
 
 	<div class="flex items-center justify-between">
@@ -443,16 +493,16 @@
 				}}
 				disabled={running}
 			>
-				{$t("plugin.table-browser.prev")}
+				{$t('plugin.table-browser.prev')}
 			</button>
 		{/if}
 
 		<p class="flex-grow-0 px-4">
-			{$t("plugin.table-browser.showing", {
+			{$t('plugin.table-browser.showing', {
 				values: {
 					from: result.length ? offset + 1 : offset,
-					to: offset + result.length,
-				},
+					to: offset + result.length
+				}
 			})}
 		</p>
 
@@ -465,7 +515,7 @@
 				}}
 				disabled={running}
 			>
-				{$t("plugin.table-browser.next")}
+				{$t('plugin.table-browser.next')}
 			</button>
 		{/if}
 	</div>
