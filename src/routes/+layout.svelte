@@ -55,9 +55,7 @@
 <div class="drawer lg:drawer-open">
 	<input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content flex flex-col items-center justify-center">
-		<div
-			class="navbar min-h-12 w-full border-b border-white border-opacity-20 bg-white bg-opacity-10 shadow-lg backdrop-blur-lg"
-		>
+		<div class="navbar bg-base-200 min-h-12 w-full">
 			<div class="flex-1">
 				<a class="btn-ghost btn-sm btn text-xl normal-case" href="/">
 					<img
@@ -87,25 +85,19 @@
 				</label>
 			</div>
 		</div>
-		<div
-			class="w-full flex-1 overflow-y-auto bg-grid-slate-700/[0.6] bg-center px-4 pb-4 [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"
-		>
-			<div class="p-4">
-				<h2 class="mb-2 text-sm font-bold uppercase tracking-wider">Databases</h2>
-				<div class="btn-group">
-					{#each data.dbms as db}
-						<a href="/db/{db}" class="btn" class:btn-active={$page.params.database === db}>{db}</a>
-					{/each}
-				</div>
+		<div class="w-full flex-1 overflow-y-auto p-4">
+			<h2 class="mb-2 text-sm font-bold uppercase tracking-wider">Databases</h2>
+			<div class="btn-group mb-4">
+				{#each data.dbms as db}
+					<a href="/db/{db}" class="btn" class:btn-active={$page.params.database === db}>{db}</a>
+				{/each}
 			</div>
 			<slot />
 		</div>
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer-2" class="drawer-overlay"></label>
-		<ul
-			class="menu min-h-full w-80 border-r border-slate-700 bg-slate-800/[.9] p-4 text-base-content backdrop-blur-lg"
-		>
+		<ul class="menu min-h-full w-80 bg-base-200 p-4 text-base-content">
 			<!-- Sidebar content here -->
 			<li class="menu-title">{$t('tables')}</li>
 			{#if tables.length > 0}

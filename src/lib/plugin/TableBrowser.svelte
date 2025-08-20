@@ -385,24 +385,16 @@
 												type="number"
 												bind:value={row[key]}
 												on:blur={() => edit(row._, key)}
-												disabled={locked || running || is_custom_sql_result}
-												title={locked
-													? $t("plugin.table-browser.table-is-locked")
-													: is_custom_sql_result
-													? 'Editing is disabled for custom queries'
-													: undefined}
+												disabled={locked || running}
+												title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
 											/>
 										{:else}
 											<input
 												class="input-ghost input input-xs hover:input-border text-base transition-all disabled:bg-transparent"
 												bind:value={row[key]}
 												on:change={() => edit(row._, key)}
-												disabled={locked || running || is_custom_sql_result}
-												title={locked
-													? $t("plugin.table-browser.table-is-locked")
-													: is_custom_sql_result
-													? 'Editing is disabled for custom queries'
-													: undefined}
+												disabled={locked || running}
+												title={locked ? $t('plugin.table-browser.table-is-locked') : undefined}
 											/>
 										{/if}
 									</td>
@@ -415,7 +407,7 @@
 									<button
 										class="btn-outline btn-error btn-xs btn"
 										on:click={() => remove(row._)}
-										disabled={locked || running || is_custom_sql_result}
+										disabled={locked || running}
 									>
 										<Icon class="text-lg" icon="mdi:delete-outline" />
 									</button>
