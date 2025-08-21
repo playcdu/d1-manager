@@ -361,7 +361,7 @@
 		if (data.length === 0) return widths;
 
 		const headers = Object.keys(data[0]);
-		const font = "12px sans-serif"; // Must match Tailwind's text-xs
+		const font = "16px sans-serif"; // Must match Tailwind's text-base
 		const minWidth = 50;
 		const padding = 32;
 
@@ -417,7 +417,7 @@
 					placeholder={query_mode === "semantic"
 						? "Enter a semantic query..."
 						: "Enter an SQL query..."}
-					class="input-bordered input w-full"
+					class="input-bordered input w-full bg-white/60 backdrop-blur-lg"
 					bind:value={query}
 				/>
 				<button
