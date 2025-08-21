@@ -61,9 +61,9 @@
 	}
 
 	async function import_db() {
-		const file = document.createElement('input');
-		file.type = 'file';
-		file.accept = '.sqlite3,.sqlite,.db,.sql';
+		const file = document.createElement("input");
+		file.type = "file";
+		file.accept = ".sqlite3,.sqlite,.db,.sql";
 		file.onchange = async () => {
 			if (file.files?.length !== 1) {
 				return;
@@ -71,7 +71,7 @@
 
 			const db = file.files[0];
 			let sql: string;
-			if (db.name.endsWith('.sql')) {
+			if (db.name.endsWith(".sql")) {
 				sql = await db.text();
 			} else {
 				sql = await sqlite2sql(await db.arrayBuffer());
@@ -80,8 +80,8 @@
 			console.log(sql);
 
 			const res = await fetch(`/api/db/${$page.params.database}/exec`, {
-				method: 'POST',
-				body: JSON.stringify({ query: sql })
+				method: "POST",
+				body: JSON.stringify({ query: sql }),
 			});
 
 			if (res.ok) {
@@ -98,42 +98,41 @@
 
 <svelte:head>
 	<title>{$page.params.database} | Craft Down Under</title>
-	<meta
-		name="description"
-		content="Manage the {$page.params.database} database."
-	/>
+	<meta name="description" content="Manage the {$page.params.database} database." />
 </svelte:head>
 
 <div class="flex flex-col gap-4">
 	<div class="grid grid-cols-2 gap-4">
 		<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
-			<div class="text-sm font-medium text-gray-500">{$t('tables')}</div>
+			<div class="text-sm font-medium text-gray-500">{$t("tables")}</div>
 			<div class="text-5xl font-bold">{data.db.length}</div>
 		</div>
 		<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
-			<div class="text-sm font-medium text-gray-500">{$t('total-rows')}</div>
+			<div class="text-sm font-medium text-gray-500">{$t("total-rows")}</div>
 			<div class="text-5xl font-bold">{data.db.reduce((acc, t) => acc + t.count, 0)}</div>
 		</div>
 	</div>
 
 	<div class="flex gap-2">
 		<button
-			class="rounded-md bg-blue-500 px-4 py-2 text-white shadow-md transition-all hover:bg-blue-600 hover:shadow-lg"
+			class="btn btn-primary shadow-md transition-all hover:shadow-lg"
 			on:click={import_db}
 		>
-			{$t('import')}
+			<Icon icon="mdi:database-import-outline" class="text-xl" />
+			{$t("import")}
 		</button>
 		<a
-			class="rounded-md bg-white/60 px-4 py-2 text-gray-800 shadow-md backdrop-blur-lg transition-all hover:bg-white/80 hover:shadow-lg"
+			class="btn shadow-md backdrop-blur-lg transition-all hover:shadow-lg"
 			href="/api/db/{$page.params.database}/dump/db-{$page.params.database}.sqlite3"
 			target="_blank"
 			rel="noreferrer"
 		>
-			{$t('download')}
+			<Icon icon="mdi:database-export-outline" class="text-xl" />
+			{$t("download")}
 		</a>
 	</div>
 
-	<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
+	<div class="rounded-lg border border-gray-300 bg-white/60 p-4 shadow backdrop-blur-lg">
 		<div class="flex">
 			<textarea
 				class="w-full flex-1 rounded-l-md border border-gray-300 bg-white/60 p-2 font-mono text-lg backdrop-blur-lg focus:border-blue-500 focus:ring-blue-500"
@@ -159,7 +158,7 @@
 			<div class="mt-2 text-red-500">{error}</div>
 		{:else if duration}
 			<div class="mt-2 text-sm text-gray-500">
-				{$t('n-ms', { values: { n: duration.toFixed(2) } })}
+				{$t("n-ms", { values: { n: duration.toFixed(2) } })}
 			</div>
 		{/if}
 	</div>

@@ -381,7 +381,7 @@
 	}
 </script>
 
-<div class="flex items-center justify-between pt-4 pb-2">
+<div class="space-y-4">
 	<div class="form-control w-52">
 		<label class="label cursor-pointer">
 			<span class="label-text">
@@ -394,186 +394,190 @@
 			<input type="checkbox" class="toggle toggle-primary" bind:checked={locked} />
 		</label>
 	</div>
-</div>
 
-<div class="tabs-boxed tabs mb-2 w-max bg-white/60 backdrop-blur-lg">
-	<button
-		class="tab"
-		class:tab-active={query_mode === "semantic"}
-		on:click={() => (query_mode = "semantic")}>Semantic</button
-	>
-	<button
-		class="tab"
-		class:tab-active={query_mode === "sql"}
-		on:click={() => (query_mode = "sql")}>SQL</button
-	>
-</div>
-<form class="form-control" on:submit|preventDefault={run_query}>
-	<div class="input-group">
-		<input
-			type="text"
-			placeholder={query_mode === "semantic"
-				? "Enter a semantic query..."
-				: "Enter an SQL query..."}
-			class="input-bordered input w-full bg-white/60 backdrop-blur-lg"
-			bind:value={query}
-		/>
-		<button
-			type="submit"
-			class="btn btn-primary shadow-md transition-all hover:shadow-lg"
-			on:click={run_query}>Query</button
-		>
-	</div>
-</form>
-
-{#if last_run_sql}
-	<div class="my-4">
-		<p class="text-sm font-bold tracking-wider uppercase">Last Query</p>
-		<div
-			class="rounded-md border border-white/20 bg-white/60 p-2 font-mono text-sm backdrop-blur-lg"
-		>
-			{last_run_sql}
+	<div class="rounded-lg border border-gray-300 bg-white/60 p-4 shadow backdrop-blur-lg">
+		<div class="tabs-boxed tabs mb-2 w-max">
+			<button
+				class="tab"
+				class:tab-active={query_mode === "semantic"}
+				on:click={() => (query_mode = "semantic")}>Semantic</button
+			>
+			<button
+				class="tab"
+				class:tab-active={query_mode === "sql"}
+				on:click={() => (query_mode = "sql")}>SQL</button
+			>
 		</div>
+		<form class="form-control" on:submit|preventDefault={run_query}>
+			<div class="input-group">
+				<input
+					type="text"
+					placeholder={query_mode === "semantic"
+						? "Enter a semantic query..."
+						: "Enter an SQL query..."}
+					class="input-bordered input w-full"
+					bind:value={query}
+				/>
+				<button
+					type="submit"
+					class="btn btn-primary shadow-md transition-all hover:shadow-lg"
+					on:click={run_query}>Query</button
+				>
+			</div>
+		</form>
 	</div>
-{/if}
 
-{#if result}
-	{#if result.length > 0}
-		<div
-			class="max-h-[80vh] overflow-auto rounded-lg border border-gray-300 bg-white/60 shadow backdrop-blur-lg transition-opacity"
-			class:opacity-50={running}
-		>
-			<table class="table-zebra min-w-full table-auto">
-				<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
-					<tr>
-						{#each Object.keys(result[0] || {}) as col}
-							{#if col !== "_"}
-								<th
-									class="relative cursor-pointer border border-gray-300 px-4 py-2 text-left text-xs font-medium tracking-wider uppercase select-none"
-									on:click={() => change_sort(col)}
-									style:width={columnWidths[col]
-										? `${columnWidths[col]}px`
-										: "auto"}
-									title={col}
-								>
-									<div
-										class="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-transparent to-white/50"
-									></div>
-									<div class="relative flex items-center justify-between gap-2">
-										<div class="truncate">
-											{col}
-										</div>
-										{#if order === col && !is_custom_sql_result}
-											<Icon
-												icon={dir === "ASC"
-													? "mdi:arrow-up"
-													: "mdi:arrow-down"}
-											/>
-										{/if}
-									</div>
-									<div
-										class="absolute top-0 right-0 h-full w-2 cursor-col-resize"
-										on:mousedown={(e) => onMouseDown(e, col)}
-									></div>
-								</th>
-							{/if}
-						{/each}
-						<th class="border border-gray-300"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each result as row}
-						<tr class="group">
-							{#each Object.entries(row) as [key, value]}
-								{#if key !== "_"}
-									<td class="border border-gray-300">
-										{#if typeof value === "number"}
-											<input
-												class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
-												type="number"
-												bind:value={row[key]}
-												on:blur={() => edit(row._, key)}
-												disabled={locked || running}
-												title={locked
-													? $t("plugin.table-browser.table-is-locked")
-													: undefined}
-											/>
-										{:else}
-											<input
-												class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
-												bind:value={row[key]}
-												on:change={() => edit(row._, key)}
-												disabled={locked || running}
-												title={locked
-													? $t("plugin.table-browser.table-is-locked")
-													: undefined}
-											/>
-										{/if}
-									</td>
-								{/if}
-							{/each}
-							<td
-								class="border border-gray-300 opacity-0 transition-opacity group-hover:opacity-100"
-							>
-								<button
-									class="btn-outline btn-error btn-xs btn"
-									on:click={() => remove(row._)}
-									disabled={locked || running}
-								>
-									<Icon class="text-lg" icon="mdi:delete-outline" />
-								</button>
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+	{#if last_run_sql}
+		<div class="my-4">
+			<p class="text-sm font-bold tracking-wider uppercase">Last Query</p>
+			<div
+				class="rounded-md border border-white/20 bg-white/60 p-2 font-mono text-sm backdrop-blur-lg"
+			>
+				{last_run_sql}
+			</div>
 		</div>
-	{:else}
-		<p class="mt-4">
-			{$t("plugin.table-browser.no-results")}
-		</p>
 	{/if}
 
-	<div class="flex items-center justify-between pt-2">
-		{#if offset > 0 && !is_custom_sql_result}
-			<button
-				class="btn-ghost btn-sm btn"
-				on:click={() => {
-					offset -= limit;
-					run();
-				}}
-				disabled={running}
+	{#if result}
+		{#if result.length > 0}
+			<div
+				class="max-h-[80vh] overflow-auto rounded-lg border border-gray-300 bg-white/60 shadow backdrop-blur-lg transition-opacity"
+				class:opacity-50={running}
 			>
-				{$t("plugin.table-browser.prev")}
-			</button>
+				<table class="table-zebra min-w-full table-auto">
+					<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
+						<tr>
+							{#each Object.keys(result[0] || {}) as col}
+								{#if col !== "_"}
+									<th
+										class="relative cursor-pointer border border-gray-300 px-4 py-2 text-left text-xs font-medium tracking-wider uppercase select-none"
+										on:click={() => change_sort(col)}
+										style:width={columnWidths[col]
+											? `${columnWidths[col]}px`
+											: "auto"}
+										title={col}
+									>
+										<div
+											class="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-transparent to-white/50"
+										></div>
+										<div
+											class="relative flex items-center justify-between gap-2"
+										>
+											<div class="truncate">
+												{col}
+											</div>
+											{#if order === col && !is_custom_sql_result}
+												<Icon
+													icon={dir === "ASC"
+														? "mdi:arrow-up"
+														: "mdi:arrow-down"}
+												/>
+											{/if}
+										</div>
+										<div
+											class="absolute top-0 right-0 h-full w-2 cursor-col-resize"
+											on:mousedown={(e) => onMouseDown(e, col)}
+										></div>
+									</th>
+								{/if}
+							{/each}
+							<th class="border border-gray-300"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each result as row}
+							<tr class="group">
+								{#each Object.entries(row) as [key, value]}
+									{#if key !== "_"}
+										<td class="border border-gray-300">
+											{#if typeof value === "number"}
+												<input
+													class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+													type="number"
+													bind:value={row[key]}
+													on:blur={() => edit(row._, key)}
+													disabled={locked || running}
+													title={locked
+														? $t("plugin.table-browser.table-is-locked")
+														: undefined}
+												/>
+											{:else}
+												<input
+													class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+													bind:value={row[key]}
+													on:change={() => edit(row._, key)}
+													disabled={locked || running}
+													title={locked
+														? $t("plugin.table-browser.table-is-locked")
+														: undefined}
+												/>
+											{/if}
+										</td>
+									{/if}
+								{/each}
+								<td
+									class="border border-gray-300 opacity-0 transition-opacity group-hover:opacity-100"
+								>
+									<button
+										class="btn-outline btn-error btn-xs btn"
+										on:click={() => remove(row._)}
+										disabled={locked || running}
+									>
+										<Icon class="text-lg" icon="mdi:delete-outline" />
+									</button>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{:else}
+			<p class="mt-4">
+				{$t("plugin.table-browser.no-results")}
+			</p>
 		{/if}
 
-		<p class="flex-grow text-center">
-			{$t("plugin.table-browser.showing", {
-				values: {
-					from: result.length ? offset + 1 : offset,
-					to: offset + result.length,
-				},
-			})}
-		</p>
+		<div class="flex items-center justify-between pt-2">
+			{#if offset > 0 && !is_custom_sql_result}
+				<button
+					class="btn-ghost btn-sm btn"
+					on:click={() => {
+						offset -= limit;
+						run();
+					}}
+					disabled={running}
+				>
+					{$t("plugin.table-browser.prev")}
+				</button>
+			{/if}
 
-		{#if result.length === limit && !is_custom_sql_result}
-			<button
-				class="btn-ghost btn-sm btn"
-				on:click={() => {
-					offset += limit;
-					run();
-				}}
-				disabled={running}
-			>
-				{$t("plugin.table-browser.next")}
-			</button>
-		{/if}
-	</div>
-{/if}
+			<p class="flex-grow text-center">
+				{$t("plugin.table-browser.showing", {
+					values: {
+						from: result.length ? offset + 1 : offset,
+						to: offset + result.length,
+					},
+				})}
+			</p>
 
-{#if error}
-	<div class="alert alert-error shadow-lg">
-		<div>{error.error.cause || error.error.message}</div>
-	</div>
-{/if}
+			{#if result.length === limit && !is_custom_sql_result}
+				<button
+					class="btn-ghost btn-sm btn"
+					on:click={() => {
+						offset += limit;
+						run();
+					}}
+					disabled={running}
+				>
+					{$t("plugin.table-browser.next")}
+				</button>
+			{/if}
+		</div>
+	{/if}
+
+	{#if error}
+		<div class="alert alert-error shadow-lg">
+			<div>{error.error.cause || error.error.message}</div>
+		</div>
+	{/if}
+</div>

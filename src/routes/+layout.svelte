@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
-	import { goto } from "$app/navigation";
+	import { goto, preloadData } from "$app/navigation";
 	import { page } from "$app/stores";
 	import { get } from "$lib/storage";
 	import { onMount } from "svelte";
@@ -8,24 +8,9 @@
 	import { writable } from "svelte/store";
 	import "../app.css";
 	import type { LayoutData } from "./$types";
-	import { preloadData } from "$app/navigation";
-	import type { PluginData } from '$lib/plugin/type';
+	import Icon from "@iconify/svelte";
 
 	export let data: LayoutData;
-	let tables: PluginData["db"] = [];
-
-	async function fetch_tables() {
-		if ($page.params.database) {
-			const res = await fetch(`/api/db/${$page.params.database}`);
-			if (res.ok) {
-				tables = await res.json();
-			}
-		} else {
-			tables = [];
-		}
-	}
-
-	$: $page.params.database, browser && fetch_tables();
 
 	let lang = writable<string | null | undefined>(undefined);
 
@@ -52,54 +37,68 @@
 	<title>Craft Down Under D1 Manager</title>
 </svelte:head>
 
-<div class="grid h-dvh w-full grid-cols-[320px_1fr] bg-gray-100 text-gray-800">
+<div class="grid h-dvh w-full grid-cols-[280px_1fr] bg-gray-100 font-sans text-gray-800">
 	<!-- Sidebar -->
-	<div class="flex-shrink-0 bg-gray-800 text-white">
-		<div class="flex h-full flex-col">
-			<div class="flex h-16 flex-shrink-0 items-center justify-center bg-gray-900 px-4">
-				<a class="flex items-center text-xl font-semibold" href="/">
-					<img
-						src="https://cdn.playcdu.co/Images/Branding/Blue/BH_NU_Asset_6.png"
-						alt="Craft Down Under Logo"
-						class="mr-2 h-8"
-					/>
-					<span>Craft Down Under D1 Manager</span>
-				</a>
-			</div>
-			<div class="flex-1 overflow-y-auto p-4">
-				<h2 class="mb-2 text-sm font-bold uppercase tracking-wider text-gray-400">Databases</h2>
-				<div class="flex flex-col gap-2">
-					{#each data.dbms as db}
-						<a
-							href="/db/{db}"
-							class="rounded-md px-4 py-2 text-left"
-							class:bg-gray-700={$page.params.database === db}
-							>{db}</a
-						>
-					{/each}
-				</div>
-				<hr class="my-4 border-gray-700" />
-				<h2 class="mb-2 text-sm font-bold uppercase tracking-wider text-gray-400">Tables</h2>
-				{#if tables.length > 0}
-					<div class="flex flex-col gap-2">
-						{#each tables as table}
+	<div class="flex flex-col border-r border-white/20 bg-gray-800/80 text-white backdrop-blur-lg">
+		<div class="flex h-20 flex-shrink-0 items-center gap-4 px-6">
+			<img
+				src="https://cdn.playcdu.co/Images/Branding/Blue/BH_NU_Asset_6.png"
+				alt="Craft Down Under Logo"
+				class="h-10"
+			/>
+			<span class="text-xl font-semibold">D1 Manager</span>
+		</div>
+		<div class="flex-1 overflow-y-auto p-4">
+			<nav class="flex flex-col gap-4">
+				<div>
+					<h2 class="mb-2 text-sm font-bold tracking-wider text-gray-400 uppercase">
+						Databases
+					</h2>
+					<div class="flex flex-col gap-1">
+						{#each data.dbms as db}
 							<a
-								href={`/db/${$page.params.database}/${table.name}`}
-								class="rounded-md px-4 py-2"
-								class:bg-gray-700={$page.params.table === table.name}
+								href="/db/{db}"
+								class="flex items-center gap-3 rounded-md px-4 py-2 text-left transition-colors"
+								class:bg-blue-500={$page.params.database === db}
+								class:hover:bg-gray-700={$page.params.database !== db}
 							>
-								{table.name}
-							</a>
+								<Icon icon="mdi:database-outline" class="text-xl" />
+								<span>{db}</span></a
+							>
 						{/each}
 					</div>
+				</div>
+				<hr class="border-gray-700" />
+				{#if $page.data.db}
+					<div>
+						<h2 class="mb-2 text-sm font-bold tracking-wider text-gray-400 uppercase">
+							Tables
+						</h2>
+						<div class="flex flex-col gap-1">
+							{#each $page.data.db as table}
+								<a
+									href={`/db/${$page.params.database}/${table.name}`}
+									class="flex items-center gap-3 rounded-md px-4 py-2 transition-colors"
+									class:bg-blue-500={$page.params.table === table.name}
+									class:hover:bg-gray-700={$page.params.table !== table.name}
+								>
+									<Icon icon="mdi:table" class="text-xl" />
+									<span>{table.name}</span>
+								</a>
+							{/each}
+						</div>
+					</div>
 				{/if}
-			</div>
+			</nav>
 		</div>
 	</div>
 
 	<!-- Main content -->
 	<div class="flex flex-col overflow-hidden">
-		<div class="flex-1 overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-blue-50 p-8">
+		<div
+			class="bg-grid-slate-100 flex-1 overflow-y-auto p-8"
+			style="background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px); background-size: 20px 20px;"
+		>
 			<slot />
 		</div>
 	</div>

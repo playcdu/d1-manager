@@ -40,12 +40,12 @@
 	/>
 </svelte:head>
 
-<div class="rounded-lg bg-white/60 p-4 shadow backdrop-blur-lg">
-	<div class="border-b border-gray-200">
+<div class="rounded-lg border border-gray-300 bg-white/60 shadow backdrop-blur-lg">
+	<div class="border-b border-gray-200 p-4">
 		<nav class="-mb-px flex gap-6">
 			{#each Object.keys(plugins) as name}
 				<button
-					class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+					class="border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
 					class:border-blue-500={plugin === name}
 					class:text-blue-600={plugin === name}
 					class:border-transparent={plugin !== name}
@@ -60,7 +60,7 @@
 		</nav>
 	</div>
 
-	<div class="mt-4">
+	<div class="p-4">
 		{#if PluginComponent}
 			<svelte:component
 				this={PluginComponent}
