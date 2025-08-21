@@ -31,11 +31,24 @@
 		  }
 		| undefined;
 
+	let columnWidths: Record<string, number> = {};
+	let resizingColumn: string | null = null;
+	let startX: number | null = null;
+	let startWidth: number | null = null;
+
 	onMount(() => {
 		const saved_locked_state = localStorage.getItem("d1-manager:locked-state");
 		if (saved_locked_state) {
 			locked = JSON.parse(saved_locked_state);
 		}
+
+		window.addEventListener("mousemove", onMouseMove);
+		window.addEventListener("mouseup", onMouseUp);
+
+		return () => {
+			window.removeEventListener("mousemove", onMouseMove);
+			window.removeEventListener("mouseup", onMouseUp);
+		};
 	});
 
 	$: {
@@ -44,6 +57,7 @@
 
 	$: if (browser && table) {
 		result = undefined;
+		columnWidths = {};
 		run();
 		offset = 0;
 		order = "";
@@ -76,6 +90,9 @@
 					result = undefined;
 				} else {
 					result = json;
+					if (result) {
+						columnWidths = calculateColumnWidths(result);
+					}
 					error = undefined;
 				}
 			} else {
@@ -151,6 +168,9 @@
 				if (query_res.ok) {
 					if ("results" in query_json) {
 						result = query_json.results;
+						if (result) {
+							columnWidths = calculateColumnWidths(result);
+						}
 					} else {
 						result = [];
 					}
@@ -173,6 +193,9 @@
 				if (res.ok) {
 					if ("results" in json) {
 						result = json.results;
+						if (result) {
+							columnWidths = calculateColumnWidths(result);
+						}
 					} else {
 						result = [];
 					}
@@ -302,6 +325,68 @@
 		}
 		run();
 	}
+
+	function onMouseDown(e: MouseEvent, col: string) {
+		resizingColumn = col;
+		startX = e.clientX;
+		const th = (e.currentTarget as HTMLElement).parentElement;
+		startWidth = th?.offsetWidth || null;
+	}
+
+	function onMouseMove(e: MouseEvent) {
+		if (resizingColumn && startX !== null && startWidth !== null) {
+			const diff = e.clientX - startX;
+			columnWidths[resizingColumn] = startWidth + diff;
+		}
+	}
+
+	function onMouseUp() {
+		resizingColumn = null;
+		startX = null;
+		startWidth = null;
+	}
+
+	function getTextWidth(text: string, font: string): number {
+		if (!browser) return 0;
+		const canvas = document.createElement("canvas");
+		const context = canvas.getContext("2d");
+		if (!context) return 0;
+		context.font = font;
+		const metrics = context.measureText(text);
+		return metrics.width;
+	}
+
+	function calculateColumnWidths(data: Record<string, unknown>[]): Record<string, number> {
+		const widths: Record<string, number> = {};
+		if (data.length === 0) return widths;
+
+		const headers = Object.keys(data[0]);
+		const dataFont = "12px sans-serif"; // Corresponds to input-xs
+		const headerFont = "12px sans-serif"; // Corresponds to text-xs
+		const minWidth = 50;
+		const padding = 32;
+
+		for (const header of headers) {
+			if (header === "_") continue;
+
+			const headerWidth = getTextWidth(header, `500 ${headerFont}`);
+
+			let maxDataWidth = 0;
+			for (const row of data) {
+				const cellText = String(row[header] ?? "");
+				const cellWidth = getTextWidth(cellText, dataFont);
+				if (cellWidth > maxDataWidth) {
+					maxDataWidth = cellWidth;
+				}
+			}
+			widths[header] = Math.max(
+				minWidth,
+				Math.ceil(Math.max(headerWidth, maxDataWidth)) + padding,
+			);
+		}
+
+		return widths;
+	}
 </script>
 
 <div class="space-y-4">
@@ -367,7 +452,7 @@
 				class="max-h-[80vh] overflow-auto rounded-lg border border-gray-300 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 				class:opacity-50={running}
 			>
-				<table class="table-zebra min-w-full table-auto">
+				<table class="table-zebra min-w-full table-fixed">
 					<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
 						<tr>
 							{#each Object.keys(result[0] || {}) as col}
@@ -375,6 +460,9 @@
 									<th
 										class="relative cursor-pointer border border-gray-300 px-4 py-2 text-left text-xs font-medium tracking-wider uppercase select-none"
 										on:click={() => change_sort(col)}
+										style:width={columnWidths[col]
+											? `${columnWidths[col]}px`
+											: "auto"}
 										title={col}
 									>
 										<div
@@ -394,6 +482,10 @@
 												/>
 											{/if}
 										</div>
+										<div
+											class="absolute top-0 right-0 h-full w-2 cursor-col-resize"
+											on:mousedown={(e) => onMouseDown(e, col)}
+										></div>
 									</th>
 								{/if}
 							{/each}
@@ -408,7 +500,7 @@
 										<td class="border border-gray-300">
 											{#if typeof value === "number"}
 												<input
-													class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+													class="input-ghost input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
 													type="number"
 													bind:value={row[key]}
 													on:blur={() => edit(row._, key)}
@@ -419,7 +511,7 @@
 												/>
 											{:else}
 												<input
-													class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+													class="input-ghost input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
 													bind:value={row[key]}
 													on:change={() => edit(row._, key)}
 													disabled={locked || running}
