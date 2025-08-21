@@ -32,12 +32,26 @@
 		| undefined;
 
 	let hiddenColumns: string[] = [];
+	let showColumnModal = false;
+
+	let columnWidths: Record<string, number> = {};
+	let resizingColumn: string | null = null;
+	let startX: number | null = null;
+	let startWidth: number | null = null;
 
 	onMount(() => {
 		const saved_locked_state = localStorage.getItem("d1-manager:locked-state");
 		if (saved_locked_state) {
 			locked = JSON.parse(saved_locked_state);
 		}
+
+		window.addEventListener("mousemove", onMouseMove);
+		window.addEventListener("mouseup", onMouseUp);
+
+		return () => {
+			window.removeEventListener("mousemove", onMouseMove);
+			window.removeEventListener("mouseup", onMouseUp);
+		};
 	});
 
 	$: {
@@ -47,6 +61,7 @@
 	$: if (browser && table) {
 		result = undefined;
 		hiddenColumns = [];
+		columnWidths = {};
 		run();
 		offset = 0;
 		order = "";
@@ -312,6 +327,26 @@
 			: [...hiddenColumns, col];
 		hiddenColumns = newHidden;
 	}
+
+	function onMouseDown(e: MouseEvent, col: string) {
+		resizingColumn = col;
+		startX = e.clientX;
+		const th = (e.currentTarget as HTMLElement).parentElement;
+		startWidth = th?.offsetWidth || null;
+	}
+
+	function onMouseMove(e: MouseEvent) {
+		if (resizingColumn && startX !== null && startWidth !== null) {
+			const diff = e.clientX - startX;
+			columnWidths[resizingColumn] = startWidth + diff;
+		}
+	}
+
+	function onMouseUp() {
+		resizingColumn = null;
+		startX = null;
+		startWidth = null;
+	}
 </script>
 
 <div class="flex items-center justify-between pt-4 pb-2">
@@ -328,12 +363,17 @@
 		</label>
 	</div>
 
-	<div class="dropdown dropdown-end">
-		<button class="btn btn-ghost">
-			<Icon icon="mdi:eye-outline" class="text-xl" />
-			Columns
-		</button>
-		<div class="dropdown-content bg-base-200 rounded-box menu z-20 w-56 p-2 shadow-lg">
+	<button class="btn btn-ghost" on:click={() => (showColumnModal = true)}>
+		<Icon icon="mdi:eye-outline" class="text-xl" />
+		Columns
+	</button>
+</div>
+
+<input type="checkbox" class="modal-toggle" bind:checked={showColumnModal} />
+<div class="modal">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold">Show/Hide Columns</h3>
+		<div class="py-4">
 			{#if result && result.length > 0}
 				{#each Object.keys(result[0]) as col}
 					{#if col !== "_"}
@@ -350,7 +390,13 @@
 				{/each}
 			{/if}
 		</div>
+		<div class="modal-action">
+			<button class="btn" on:click={() => (showColumnModal = false)}>Close</button>
+		</div>
 	</div>
+	<label class="modal-backdrop" for="my-modal" on:click={() => (showColumnModal = false)}
+		>Close</label
+	>
 </div>
 
 <div class="tabs-boxed tabs mb-2 w-max bg-white/60 backdrop-blur-lg">
@@ -397,7 +443,7 @@
 {#if result}
 	{#if result.length > 0}
 		<div
-			class="max-h-[80vh] overflow-auto rounded-lg border border-white/20 bg-white/60 shadow backdrop-blur-lg transition-opacity"
+			class="max-h-[80vh] overflow-auto rounded-lg border border-gray-300 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 			class:opacity-50={running}
 		>
 			<table class="table-zebra min-w-full table-auto">
@@ -406,11 +452,17 @@
 						{#each Object.keys(result[0] || {}).filter((col) => !hiddenColumns.includes(col)) as col}
 							{#if col !== "_"}
 								<th
-									class="cursor-pointer border border-white/20 select-none"
+									class="relative cursor-pointer border border-gray-300 select-none"
 									on:click={() => change_sort(col)}
+									style:width={columnWidths[col]
+										? `${columnWidths[col]}px`
+										: "auto"}
+									title={col}
 								>
-									<div class="flex items-center gap-2">
-										{col}
+									<div class="flex items-center justify-between gap-2">
+										<div class="truncate">
+											{col}
+										</div>
 										{#if order === col && !is_custom_sql_result}
 											<Icon
 												icon={dir === "ASC"
@@ -419,10 +471,14 @@
 											/>
 										{/if}
 									</div>
+									<div
+										class="absolute top-0 right-0 h-full w-2 cursor-col-resize"
+										on:mousedown={(e) => onMouseDown(e, col)}
+									></div>
 								</th>
 							{/if}
 						{/each}
-						<th class="border border-white/20"></th>
+						<th class="border border-gray-300"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -430,7 +486,7 @@
 						<tr class="group">
 							{#each Object.entries(row).filter(([key]) => !hiddenColumns.includes(key)) as [key, value]}
 								{#if key !== "_"}
-									<td class="border border-white/20">
+									<td class="border border-gray-300">
 										{#if typeof value === "number"}
 											<input
 												class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
@@ -457,7 +513,7 @@
 								{/if}
 							{/each}
 							<td
-								class="border border-white/20 opacity-0 transition-opacity group-hover:opacity-100"
+								class="border border-gray-300 opacity-0 transition-opacity group-hover:opacity-100"
 							>
 								<button
 									class="btn-outline btn-error btn-xs btn"
