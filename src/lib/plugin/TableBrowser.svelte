@@ -394,12 +394,20 @@
 {/if}
 
 {#if result}
-	{#if result.length}
+	{#if columns}
 		<div
 			class="max-h-[80vh] overflow-auto rounded-lg border border-white/20 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 			class:opacity-50={running}
 		>
-			<SvelteTable {columns} rows={result}></SvelteTable>
+			<SvelteTable
+				{columns}
+				rows={result}
+				classNameTable="table min-w-full"
+				classNameThead="bg-white/60 backdrop-blur-lg"
+				classNameTbody="bg-white/20"
+				classNameRow="group hover"
+				classNameCell="border"
+			></SvelteTable>
 		</div>
 	{:else}
 		<p class="mt-4">
