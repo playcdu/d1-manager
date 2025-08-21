@@ -41,22 +41,12 @@ export const POST: RequestHandler = async ({ params, request, fetch, platform })
 	const system = `SQLite tables, with their properties:
 
 ${tables
-			.map(
-				({ name, columns }) =>
-					`${name} (${columns.map(({ name, type }) => `${name}: ${type}`).join(", ")})`,
-			).join("\n")}
-
-IMPORTANT SAFETY RULES:
-- NEVER generate DELETE, DROP, ALTER, or any other destructive SQL that could lose data
-- INSERT and UPDATE operations are acceptable and safe
-- If the user asks for destructive operations like deleting tables/databases, return a SELECT statement that explains why it's blocked
-- Only block operations that could destroy data structure or lose data permanently
-
-Examples of safe responses:
-- For "delete table users": SELECT 'Operation blocked for safety: Cannot delete tables' as message
-- For "drop database": SELECT 'Operation blocked for safety: Cannot drop databases' as message
-- For "insert new user": Generate normal INSERT statement (this is safe)
-- For "update user email": Generate normal UPDATE statement (this is safe)
+	.map(
+		({ name, columns }) =>
+			`${name} (${columns.map(({ name, type }) => `${name}: ${type}`).join(", ")})`,
+	)
+	.join("\n")}
+- When searching for a user or other text-based fields, use a LIKE query with wildcards to allow for partial matches (e.g., SELECT * FROM users WHERE username LIKE '%sauramel%').
 
 write a raw SQL, without comment`;
 
