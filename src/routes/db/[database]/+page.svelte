@@ -144,7 +144,7 @@
 			></textarea>
 			{#if query}
 				<button
-					class="rounded-r-md bg-blue-500 px-4 py-2 text-white shadow-md transition-all hover:bg-blue-600 hover:shadow-lg"
+					class="btn btn-primary rounded-l-none"
 					class:bg-red-500={danger}
 					on:click={run}
 					disabled={running}

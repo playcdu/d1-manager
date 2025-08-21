@@ -362,11 +362,13 @@
 
 		const headers = Object.keys(data[0]);
 		const font = "12px sans-serif"; // Must match Tailwind's text-xs
+		const minWidth = 50;
+		const padding = 32;
 
 		for (const header of headers) {
 			if (header === "_") continue;
-			const headerWidth = getTextWidth(header, `bold ${font}`);
-			let maxWidth = headerWidth;
+
+			let maxWidth = 0;
 			for (const row of data) {
 				const cellText = String(row[header] ?? "");
 				const cellWidth = getTextWidth(cellText, font);
@@ -374,7 +376,7 @@
 					maxWidth = cellWidth;
 				}
 			}
-			widths[header] = Math.ceil(maxWidth) + 32; // Add padding
+			widths[header] = Math.max(minWidth, Math.ceil(maxWidth) + padding);
 		}
 
 		return widths;
