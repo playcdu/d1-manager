@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
+	import { browser } from "$app/environment";
 	import { onMount } from "svelte";
 	import { t } from "svelte-i18n";
 
@@ -30,8 +31,9 @@
 		  }
 		| undefined;
 
+	let hiddenColumns: string[] = [];
+
 	onMount(() => {
-		run();
 		const saved_locked_state = localStorage.getItem("d1-manager:locked-state");
 		if (saved_locked_state) {
 			locked = JSON.parse(saved_locked_state);
@@ -40,6 +42,15 @@
 
 	$: {
 		localStorage.setItem("d1-manager:locked-state", JSON.stringify(locked));
+	}
+
+	$: if (browser && table) {
+		result = undefined;
+		hiddenColumns = [];
+		run();
+		offset = 0;
+		order = "";
+		dir = "ASC";
 	}
 
 	async function _fetchTableData() {
@@ -294,9 +305,16 @@
 		}
 		run();
 	}
+
+	function toggleColumnVisibility(col: string) {
+		const newHidden = hiddenColumns.includes(col)
+			? hiddenColumns.filter((c) => c !== col)
+			: [...hiddenColumns, col];
+		hiddenColumns = newHidden;
+	}
 </script>
 
-<div class="pt-4 pb-2">
+<div class="flex items-center justify-between pt-4 pb-2">
 	<div class="form-control w-52">
 		<label class="label cursor-pointer">
 			<span class="label-text">
@@ -308,6 +326,30 @@
 			</span>
 			<input type="checkbox" class="toggle toggle-primary" bind:checked={locked} />
 		</label>
+	</div>
+
+	<div class="dropdown dropdown-end">
+		<button class="btn btn-ghost">
+			<Icon icon="mdi:eye-outline" class="text-xl" />
+			Columns
+		</button>
+		<div class="dropdown-content bg-base-200 rounded-box menu z-20 w-56 p-2 shadow-lg">
+			{#if result && result.length > 0}
+				{#each Object.keys(result[0]) as col}
+					{#if col !== "_"}
+						<label class="label cursor-pointer">
+							<span class="label-text">{col}</span>
+							<input
+								type="checkbox"
+								class="checkbox"
+								checked={!hiddenColumns.includes(col)}
+								on:change={() => toggleColumnVisibility(col)}
+							/>
+						</label>
+					{/if}
+				{/each}
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -358,13 +400,13 @@
 			class="max-h-[80vh] overflow-auto rounded-lg border border-white/20 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 			class:opacity-50={running}
 		>
-			<table class="table-zebra table min-w-full">
+			<table class="table-zebra min-w-full table-auto">
 				<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
 					<tr>
-						{#each Object.keys(result[0] || {}) as col}
+						{#each Object.keys(result[0] || {}).filter((col) => !hiddenColumns.includes(col)) as col}
 							{#if col !== "_"}
 								<th
-									class="cursor-pointer select-none"
+									class="cursor-pointer border border-white/20 select-none"
 									on:click={() => change_sort(col)}
 								>
 									<div class="flex items-center gap-2">
@@ -380,15 +422,15 @@
 								</th>
 							{/if}
 						{/each}
-						<th></th>
+						<th class="border border-white/20"></th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each result as row}
 						<tr class="group">
-							{#each Object.entries(row) as [key, value]}
+							{#each Object.entries(row).filter(([key]) => !hiddenColumns.includes(key)) as [key, value]}
 								{#if key !== "_"}
-									<td class="border-t border-white/20">
+									<td class="border border-white/20">
 										{#if typeof value === "number"}
 											<input
 												class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
@@ -415,7 +457,7 @@
 								{/if}
 							{/each}
 							<td
-								class="border-t border-white/20 opacity-0 transition-opacity group-hover:opacity-100"
+								class="border border-white/20 opacity-0 transition-opacity group-hover:opacity-100"
 							>
 								<button
 									class="btn-outline btn-error btn-xs btn"
