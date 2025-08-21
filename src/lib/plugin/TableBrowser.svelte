@@ -446,7 +446,7 @@
 				class="max-h-[80vh] overflow-auto rounded-lg border border-gray-300 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 				class:opacity-50={running}
 			>
-				<table class="table-zebra min-w-full table-auto">
+				<table class="table-zebra min-w-full table-fixed">
 					<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
 						<tr>
 							{#each Object.keys(result[0] || {}) as col}
