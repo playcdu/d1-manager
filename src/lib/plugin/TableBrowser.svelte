@@ -2,17 +2,9 @@
 	import Icon from "@iconify/svelte";
 	import { onMount } from "svelte";
 	import { t } from "svelte-i18n";
-	import SvelteTable from "svelte-table";
-	import ActionsCell from "./ActionsCell.svelte";
-	import TableCell from "./TableCell.svelte";
 
 	export let database: string;
 	export let table: string;
-
-	type Person = Record<string, unknown>;
-	type Doc = {
-		[key: string]: unknown;
-	};
 
 	let locked = true;
 	let offset = 0;
@@ -200,8 +192,6 @@
 		}
 		running = true;
 
-		console.log("remove", rowid);
-
 		try {
 			if (typeof rowid !== "number") {
 				throw new Error($t("plugin.table-browser.invalid-rowid"));
@@ -240,7 +230,7 @@
 		}
 	}
 
-	async function edit(rowid: unknown) {
+	async function edit(rowid: unknown, col: string) {
 		if (running) {
 			return;
 		}
@@ -294,47 +284,16 @@
 		}
 	}
 
-	$: columns =
-		result && result.length > 0
-			? [
-					...Object.keys(result[0]).map((key) => {
-						if (key === "_") {
-							return;
-						}
-
-						const is_number = typeof result?.[0]?.[key] === "number";
-
-						return {
-							key: key,
-							title: key,
-							sortable: true,
-							renderComponent: {
-								component: TableCell,
-								props: {
-									edit,
-									locked,
-									running,
-									is_number,
-									key,
-									result,
-								},
-							},
-						};
-					}),
-					{
-						key: "actions",
-						title: "Actions",
-						renderComponent: {
-							component: ActionsCell,
-							props: {
-								remove,
-								locked,
-								running,
-							},
-						},
-					},
-				].filter((c) => c)
-			: [];
+	function change_sort(col: string) {
+		if (is_custom_sql_result) return;
+		if (order === col) {
+			dir = dir === "ASC" ? "DESC" : "ASC";
+		} else {
+			order = col;
+			dir = "ASC";
+		}
+		run();
+	}
 </script>
 
 <div class="pt-4 pb-2">
@@ -394,20 +353,82 @@
 {/if}
 
 {#if result}
-	{#if columns}
+	{#if result.length > 0}
 		<div
 			class="max-h-[80vh] overflow-auto rounded-lg border border-white/20 bg-white/60 shadow backdrop-blur-lg transition-opacity"
 			class:opacity-50={running}
 		>
-			<SvelteTable
-				{columns}
-				rows={result}
-				classNameTable="table min-w-full"
-				classNameThead="bg-white/60 backdrop-blur-lg"
-				classNameTbody="bg-white/20"
-				classNameRow="group hover"
-				classNameCell="border"
-			></SvelteTable>
+			<table class="table-zebra table min-w-full">
+				<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
+					<tr>
+						{#each Object.keys(result[0] || {}) as col}
+							{#if col !== "_"}
+								<th
+									class="cursor-pointer select-none"
+									on:click={() => change_sort(col)}
+								>
+									<div class="flex items-center gap-2">
+										{col}
+										{#if order === col && !is_custom_sql_result}
+											<Icon
+												icon={dir === "ASC"
+													? "mdi:arrow-up"
+													: "mdi:arrow-down"}
+											/>
+										{/if}
+									</div>
+								</th>
+							{/if}
+						{/each}
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each result as row}
+						<tr class="group">
+							{#each Object.entries(row) as [key, value]}
+								{#if key !== "_"}
+									<td class="border-t border-white/20">
+										{#if typeof value === "number"}
+											<input
+												class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+												type="number"
+												bind:value={row[key]}
+												on:blur={() => edit(row._, key)}
+												disabled={locked || running}
+												title={locked
+													? $t("plugin.table-browser.table-is-locked")
+													: undefined}
+											/>
+										{:else}
+											<input
+												class="input-ghost input input-xs hover:input-border w-full text-base transition-all disabled:bg-transparent"
+												bind:value={row[key]}
+												on:change={() => edit(row._, key)}
+												disabled={locked || running}
+												title={locked
+													? $t("plugin.table-browser.table-is-locked")
+													: undefined}
+											/>
+										{/if}
+									</td>
+								{/if}
+							{/each}
+							<td
+								class="border-t border-white/20 opacity-0 transition-opacity group-hover:opacity-100"
+							>
+								<button
+									class="btn-outline btn-error btn-xs btn"
+									on:click={() => remove(row._)}
+									disabled={locked || running}
+								>
+									<Icon class="text-lg" icon="mdi:delete-outline" />
+								</button>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	{:else}
 		<p class="mt-4">
@@ -415,7 +436,7 @@
 		</p>
 	{/if}
 
-	<div class="flex items-center justify-between">
+	<div class="flex items-center justify-between pt-2">
 		{#if offset > 0 && !is_custom_sql_result}
 			<button
 				class="btn-ghost btn-sm btn"
@@ -429,7 +450,7 @@
 			</button>
 		{/if}
 
-		<p class="flex-grow-0 px-4">
+		<p class="flex-grow text-center">
 			{$t("plugin.table-browser.showing", {
 				values: {
 					from: result.length ? offset + 1 : offset,
