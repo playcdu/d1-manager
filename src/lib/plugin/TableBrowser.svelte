@@ -31,9 +31,6 @@
 		  }
 		| undefined;
 
-	let hiddenColumns: string[] = [];
-	let showColumnModal = false;
-
 	let columnWidths: Record<string, number> = {};
 	let resizingColumn: string | null = null;
 	let startX: number | null = null;
@@ -60,7 +57,6 @@
 
 	$: if (browser && table) {
 		result = undefined;
-		hiddenColumns = [];
 		columnWidths = {};
 		run();
 		offset = 0;
@@ -94,6 +90,9 @@
 					result = undefined;
 				} else {
 					result = json;
+					if (result) {
+						columnWidths = calculateColumnWidths(result);
+					}
 					error = undefined;
 				}
 			} else {
@@ -169,6 +168,9 @@
 				if (query_res.ok) {
 					if ("results" in query_json) {
 						result = query_json.results;
+						if (result) {
+							columnWidths = calculateColumnWidths(result);
+						}
 					} else {
 						result = [];
 					}
@@ -191,6 +193,9 @@
 				if (res.ok) {
 					if ("results" in json) {
 						result = json.results;
+						if (result) {
+							columnWidths = calculateColumnWidths(result);
+						}
 					} else {
 						result = [];
 					}
@@ -321,13 +326,6 @@
 		run();
 	}
 
-	function toggleColumnVisibility(col: string) {
-		const newHidden = hiddenColumns.includes(col)
-			? hiddenColumns.filter((c) => c !== col)
-			: [...hiddenColumns, col];
-		hiddenColumns = newHidden;
-	}
-
 	function onMouseDown(e: MouseEvent, col: string) {
 		resizingColumn = col;
 		startX = e.clientX;
@@ -347,6 +345,40 @@
 		startX = null;
 		startWidth = null;
 	}
+
+	function getTextWidth(text: string, font: string): number {
+		if (!browser) return 0;
+		const canvas = document.createElement("canvas");
+		const context = canvas.getContext("2d");
+		if (!context) return 0;
+		context.font = font;
+		const metrics = context.measureText(text);
+		return metrics.width;
+	}
+
+	function calculateColumnWidths(data: Record<string, unknown>[]): Record<string, number> {
+		const widths: Record<string, number> = {};
+		if (data.length === 0) return widths;
+
+		const headers = Object.keys(data[0]);
+		const font = "12px sans-serif"; // Must match Tailwind's text-xs
+
+		for (const header of headers) {
+			if (header === "_") continue;
+			const headerWidth = getTextWidth(header, `bold ${font}`);
+			let maxWidth = headerWidth;
+			for (const row of data) {
+				const cellText = String(row[header] ?? "");
+				const cellWidth = getTextWidth(cellText, font);
+				if (cellWidth > maxWidth) {
+					maxWidth = cellWidth;
+				}
+			}
+			widths[header] = Math.ceil(maxWidth) + 32; // Add padding
+		}
+
+		return widths;
+	}
 </script>
 
 <div class="flex items-center justify-between pt-4 pb-2">
@@ -362,41 +394,6 @@
 			<input type="checkbox" class="toggle toggle-primary" bind:checked={locked} />
 		</label>
 	</div>
-
-	<button class="btn btn-ghost" on:click={() => (showColumnModal = true)}>
-		<Icon icon="mdi:eye-outline" class="text-xl" />
-		Columns
-	</button>
-</div>
-
-<input type="checkbox" class="modal-toggle" bind:checked={showColumnModal} />
-<div class="modal">
-	<div class="modal-box">
-		<h3 class="text-lg font-bold">Show/Hide Columns</h3>
-		<div class="py-4">
-			{#if result && result.length > 0}
-				{#each Object.keys(result[0]) as col}
-					{#if col !== "_"}
-						<label class="label cursor-pointer">
-							<span class="label-text">{col}</span>
-							<input
-								type="checkbox"
-								class="checkbox"
-								checked={!hiddenColumns.includes(col)}
-								on:change={() => toggleColumnVisibility(col)}
-							/>
-						</label>
-					{/if}
-				{/each}
-			{/if}
-		</div>
-		<div class="modal-action">
-			<button class="btn" on:click={() => (showColumnModal = false)}>Close</button>
-		</div>
-	</div>
-	<label class="modal-backdrop" for="my-modal" on:click={() => (showColumnModal = false)}
-		>Close</label
-	>
 </div>
 
 <div class="tabs-boxed tabs mb-2 w-max bg-white/60 backdrop-blur-lg">
@@ -449,17 +446,20 @@
 			<table class="table-zebra min-w-full table-auto">
 				<thead class="sticky top-0 bg-white/80 backdrop-blur-lg">
 					<tr>
-						{#each Object.keys(result[0] || {}).filter((col) => !hiddenColumns.includes(col)) as col}
+						{#each Object.keys(result[0] || {}) as col}
 							{#if col !== "_"}
 								<th
-									class="relative cursor-pointer border border-gray-300 select-none"
+									class="relative cursor-pointer border border-gray-300 px-4 py-2 text-left text-xs font-medium tracking-wider uppercase select-none"
 									on:click={() => change_sort(col)}
 									style:width={columnWidths[col]
 										? `${columnWidths[col]}px`
 										: "auto"}
 									title={col}
 								>
-									<div class="flex items-center justify-between gap-2">
+									<div
+										class="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-transparent to-white/50"
+									></div>
+									<div class="relative flex items-center justify-between gap-2">
 										<div class="truncate">
 											{col}
 										</div>
@@ -484,7 +484,7 @@
 				<tbody>
 					{#each result as row}
 						<tr class="group">
-							{#each Object.entries(row).filter(([key]) => !hiddenColumns.includes(key)) as [key, value]}
+							{#each Object.entries(row) as [key, value]}
 								{#if key !== "_"}
 									<td class="border border-gray-300">
 										{#if typeof value === "number"}
