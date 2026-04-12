@@ -404,15 +404,31 @@
 	</div>
 
 	<div class="rounded-lg border border-gray-300 bg-white/60 p-4 shadow backdrop-blur-lg">
-		<div class="tabs-boxed tabs mb-2 w-max">
+		<div
+			class="mb-3 inline-flex rounded-full border border-gray-300/80 bg-gray-100/90 p-0.5 shadow-inner"
+			role="group"
+			aria-label="Query mode"
+		>
 			<button
-				class="tab"
-				class:tab-active={query_mode === "semantic"}
+				type="button"
+				class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+				class:bg-white={query_mode === "semantic"}
+				class:text-blue-700={query_mode === "semantic"}
+				class:shadow-sm={query_mode === "semantic"}
+				class:text-gray-600={query_mode !== "semantic"}
+				class:hover:text-gray-900={query_mode !== "semantic"}
+				aria-pressed={query_mode === "semantic"}
 				on:click={() => (query_mode = "semantic")}>Semantic</button
 			>
 			<button
-				class="tab"
-				class:tab-active={query_mode === "sql"}
+				type="button"
+				class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+				class:bg-white={query_mode === "sql"}
+				class:text-blue-700={query_mode === "sql"}
+				class:shadow-sm={query_mode === "sql"}
+				class:text-gray-600={query_mode !== "sql"}
+				class:hover:text-gray-900={query_mode !== "sql"}
+				aria-pressed={query_mode === "sql"}
 				on:click={() => (query_mode = "sql")}>SQL</button
 			>
 		</div>
