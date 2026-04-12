@@ -38,8 +38,10 @@
 </svelte:head>
 
 <div class="grid h-dvh w-full grid-cols-[280px_1fr] bg-gray-100 font-sans text-gray-800">
-	<!-- Sidebar -->
-	<div class="flex flex-col border-r border-white/20 bg-gray-800/80 text-white backdrop-blur-lg">
+	<!-- Sidebar: min-h-0 so flex/grid children can shrink and overflow-y-auto scrolls -->
+	<div
+		class="flex min-h-0 flex-col border-r border-white/20 bg-gray-800/80 text-white backdrop-blur-lg"
+	>
 		<div class="flex h-20 flex-shrink-0 items-center gap-4 px-6">
 			<img
 				src="https://cdn.playcdu.co/Images/Branding/Blue/BH_NU_Asset_6.png"
@@ -48,7 +50,7 @@
 			/>
 			<span class="text-xl font-semibold">D1 Manager</span>
 		</div>
-		<div class="flex-1 overflow-y-auto p-4">
+		<div class="min-h-0 flex-1 overflow-y-auto p-4">
 			<nav class="flex flex-col gap-4">
 				<div>
 					<h2 class="mb-2 text-sm font-bold tracking-wider text-gray-400 uppercase">
